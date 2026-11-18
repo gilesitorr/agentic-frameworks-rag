@@ -15,5 +15,6 @@ data/*.pdf
 chroma/
 
 # Material local de la charla (no se versiona)
-demo/
+# Los scripts (demo/*.py) sí se versionan; el README de la carpeta y el guion no.
+demo/README.md
 docs/guion-maestro.md
