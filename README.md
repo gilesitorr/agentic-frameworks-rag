@@ -1,93 +1,41 @@
 # Agentic AI en la práctica — RAG con tres frameworks
 
-Demo de la charla **"Agentic AI en la práctica: Explorando Frameworks y sus Capacidades"**
-(Demystifying AI Series — José Arenas y Gil Rodríguez).
+Demo de la charla *"Agentic AI en la práctica"* (José Arenas y Gil Rodríguez).
 
-Resolvemos **el mismo problema** —un RAG que resume el paper de ResNet a partir de
-fragmentos recuperados por búsqueda semántica— con tres frameworks, para comparar
-cómo cada uno maneja la ejecución, las validaciones y los reintentos.
+Resolvemos **el mismo problema** —un RAG que resume el paper de ResNet— con tres
+frameworks, para comparar cómo manejan la ejecución, la validación y los reintentos.
+Lo único que cambia entre implementaciones es **el framework**: mismo PDF, mismo RAG y
+mismo modelo (ver [`rag_core/config.py`](rag_core/config.py)).
 
-| Framework | Carpeta | Responsable |
-|---|---|---|
-| Hugging Face smolagents | `smolagents_impl/` | Gil |
-| LangGraph | `langgraph_impl/` | Gil |
-| Pydantic AI | `pydantic_impl/` | José |
-| Sin framework (baseline) | `baseline/` | referencia |
+| Framework | Carpeta |
+|---|---|
+| smolagents | `smolagents_impl/` |
+| LangGraph | `langgraph_impl/` |
+| Pydantic AI | `pydantic_impl/` (José) |
+| Sin framework | `baseline/` |
 
-La comparación es justa porque **lo único que cambia es el framework**: todas usan el
-mismo PDF, el mismo stack de RAG y el mismo modelo de generación, definidos en
-[`rag_core/config.py`](rag_core/config.py).
+Cada demo tiene dos partes: **básica** (recuperar y resumir) y **validación +
+reintentos** (el resumen cita secciones del documento; si la validación falla, se
+reintenta). La comparación a fondo está en [`docs/comparacion.md`](docs/comparacion.md).
 
-## Estructura
-
-```
-rag_core/              # motor RAG compartido (igual para todas las implementaciones)
-  config.py            # parámetros comunes (chunking, k, modelo, reintentos)
-  loader.py            # PDF -> texto (normalizado) + lista de secciones
-  index.py             # troceado -> fastembed -> ChromaDB
-  retrieve.py          # búsqueda semántica
-  schema.py            # resumen estructurado (parte 2): puntos con su sección
-  validation.py        # criterio de validación compartido (parte 2)
-smolagents_impl/
-  part1_basic.py       # parte 1: resumen básico
-  part2_validation.py  # parte 2: validación + reintentos (bucle a mano sobre el agente)
-langgraph_impl/
-  part1_basic.py       # parte 1: grafo recuperar -> generar
-  part2_validation.py  # parte 2: ciclo generar -> validar -> (reintentar) en el grafo
-baseline/
-  summarize_plain.py   # el mismo flujo SIN framework (todo a mano)
-data/                  # aquí va resnet.pdf (ver data/README.md)
-```
-
-## La demo tiene dos partes
-
-1. **Básica** — recuperar fragmentos y generar el resumen. Se ve la estructura del
-   código de cada framework y qué habría que hacer a mano sin uno (eso lo muestra
-   `baseline/`).
-2. **Validación + reintentos** — el resumen pasa a ser estructurado (`rag_core/schema.py`):
-   cada punto cita una sección. El criterio (`rag_core/validation.py`) exige que cada
-   sección citada **exista** en el documento y que se citen **al menos 3** distintas.
-   Si falla, se reintenta (hasta `MAX_INTENTOS`).
-
-   Lo interesante es **cómo cada framework orquesta ese reintento**:
-
-   | | Cómo maneja el reintento |
-   |---|---|
-   | **baseline** | Un `for` a mano: generar → validar → repetir. |
-   | **smolagents** | Igual, un bucle nuestro alrededor de `agent.run()`. El framework aporta el ciclo de herramientas, no la validación. |
-   | **LangGraph** | Un **ciclo explícito en el grafo**: nodo `validar` + arista condicional que vuelve a `generar`. |
-   | **Pydantic AI** (José) | Validadores de salida + reintento declarativo del propio framework. |
-
-   > **Tip para la demo:** en una corrida normal el resumen suele pasar a la
-   > primera, así que el reintento no se ve. Para **mostrarlo en vivo**, sube
-   > `MIN_SECCIONES_CITADAS` en [`rag_core/config.py`](rag_core/config.py) (p.ej.
-   > a `6`): el primer intento suele quedarse corto y verás cómo el reintento,
-   > con el feedback, lo corrige.
-
-## Puesta en marcha
+## Uso
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-
-copy .env.example .env    # y pon tu OPENAI_API_KEY
+copy .env.example .env    # pon tu OPENAI_API_KEY
 ```
 
-Descarga el PDF de ResNet en `data/resnet.pdf` (ver [`data/README.md`](data/README.md)).
-
-Corre una implementación **desde la raíz del proyecto**:
+Descarga el paper en `data/resnet.pdf` (ver [`data/README.md`](data/README.md)) y corre,
+desde la raíz del proyecto:
 
 ```powershell
 python -m smolagents_impl.part1_basic
-python -m smolagents_impl.part2_validation
-python -m langgraph_impl.part1_basic
 python -m langgraph_impl.part2_validation
 python -m baseline.summarize_plain
 ```
 
 ## Stack
 
-- **Embeddings:** fastembed (`BAAI/bge-small-en-v1.5`, local)
-- **Base vectorial:** ChromaDB (en memoria)
-- **Generación:** OpenAI (`gpt-4o-mini`)
+fastembed (embeddings) · ChromaDB (base vectorial) · OpenAI `gpt-4o-mini` (generación)

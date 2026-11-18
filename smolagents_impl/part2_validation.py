@@ -1,20 +1,20 @@
 """smolagents — Parte 2: resumen estructurado + validación + reintentos.
 
-A diferencia de la parte 1, el resumen debe ser ESTRUCTURADO: cada punto cita
-una sección del documento. Validamos que las secciones citadas existan y, si no,
-reintentamos pasándole al agente el feedback.
+smolagents nos da el ciclo de herramientas, pero la validación y el reintento los
+orquestamos nosotros: un bucle alrededor de agent.run (compáralo con LangGraph,
+donde el reintento es parte del grafo).
 
-Para la charla: smolagents nos da el ciclo de herramientas, pero la validación
-estructural y el reintento los orquestamos NOSOTROS (compáralo con Pydantic AI,
-que trae validadores, y con LangGraph, que modela el ciclo dentro del grafo).
+Además, smolagents no garantiza salida estructurada: devuelve un dict o texto JSON,
+así que lo normalizamos antes de validar.
 
-Correr desde la raíz del proyecto:
-    python -m smolagents_impl.part2_validation
+Ejecutar:  python -m smolagents_impl.part2_validation
 """
 
+import json
 import os
 
 from dotenv import load_dotenv
+from pydantic import ValidationError
 from smolagents import OpenAIServerModel, ToolCallingAgent, tool
 
 from rag_core import build_rag, config
@@ -22,75 +22,57 @@ from rag_core.schema import DocumentSummary
 from rag_core.validation import validar_resumen
 
 load_dotenv()
-
 rag = build_rag("data/resnet.pdf")
 
 
 @tool
 def search_document(query: str) -> str:
-    """Busca en el documento y devuelve los fragmentos más relevantes.
+    """Devuelve los fragmentos del documento más relevantes para la consulta.
 
     Args:
-        query: Lo que se quiere encontrar en el documento.
+        query: Lo que se busca en el documento.
     """
-    return "\n\n---\n\n".join(rag.retrieve(query))
+    return "\n\n".join(rag.retrieve(query))
 
 
-model = OpenAIServerModel(model_id=config.OPENAI_MODEL, api_key=os.environ["OPENAI_API_KEY"])
-agent = ToolCallingAgent(tools=[search_document], model=model)
+agent = ToolCallingAgent(
+    tools=[search_document],
+    model=OpenAIServerModel(model_id=config.OPENAI_MODEL, api_key=os.environ["OPENAI_API_KEY"]),
+)
 
 
-def _extraer_json(texto: str) -> str:
-    """Toma el objeto JSON de la respuesta (el agente puede añadir texto alrededor)."""
-    inicio, fin = texto.find("{"), texto.rfind("}")
-    if inicio == -1 or fin == -1:
-        raise ValueError("La respuesta no contiene un objeto JSON.")
-    return texto[inicio:fin + 1]
-
-
-def construir_tarea(feedback: str = "") -> str:
-    secciones = "\n".join(f"- {s}" for s in rag.sections)
-    tarea = (
-        "Resume el paper en varios puntos usando la herramienta search_document.\n"
-        'Responde SOLO con un JSON de la forma: '
-        '{"puntos": [{"idea": "...", "seccion": "..."}]}\n'
-        "Cada 'seccion' debe ser EXACTAMENTE una de estas etiquetas del documento:\n"
-        f"{secciones}\n"
-        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español."
+def tarea(problemas: list[str]) -> str:
+    feedback = f"\n\nCorrige esto del intento anterior: {problemas}" if problemas else ""
+    return (
+        "Resume el paper usando search_document. Devuelve JSON "
+        '{"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
+        f"Cada 'seccion' debe ser una de: {', '.join(rag.sections)}.\n"
+        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español.{feedback}"
     )
-    if feedback:
-        tarea += f"\n\nEl intento anterior falló por:\n{feedback}\nCorrígelo."
-    return tarea
 
 
 def main() -> None:
-    feedback = ""
+    problemas: list[str] = []
+    resumen = None
     for intento in range(1, config.MAX_INTENTOS + 1):
-        print(f"\n--- Intento {intento} ---")
-        salida = agent.run(construir_tarea(feedback))
+        salida = agent.run(tarea(problemas))
         try:
-            # smolagents suele devolver el objeto ya parseado (un dict); si viniera
-            # como texto, extraemos y parseamos el JSON.
-            if isinstance(salida, str):
-                resumen = DocumentSummary.model_validate_json(_extraer_json(salida))
-            else:
-                resumen = DocumentSummary.model_validate(salida)
-        except Exception as error:
-            feedback = f"La salida no cumple el esquema esperado: {error}"
-            print("  Salida inválida:", error)
+            # smolagents devuelve la salida como dict o como texto JSON.
+            datos = salida if isinstance(salida, dict) else json.loads(str(salida))
+            resumen = DocumentSummary.model_validate(datos)
+        except (json.JSONDecodeError, ValidationError) as error:
+            problemas = [f"La salida no respeta el esquema: {error}"]
+            print(f"Intento {intento}: salida inválida")
             continue
 
         problemas = validar_resumen(resumen, rag.sections)
+        print(f"Intento {intento}: {'válido' if not problemas else problemas}")
         if not problemas:
-            print("  OK - resumen válido:")
-            for punto in resumen.puntos:
-                print(f"   - [{punto.seccion}] {punto.idea}")
-            return
+            break
 
-        feedback = "\n".join(problemas)
-        print("  Problemas:", feedback)
-
-    print("\nSe agotaron los intentos sin un resumen válido.")
+    if resumen:
+        for punto in resumen.puntos:
+            print(f"- [{punto.seccion}] {punto.idea}")
 
 
 if __name__ == "__main__":

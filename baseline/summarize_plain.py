@@ -1,11 +1,9 @@
-"""Baseline — el MISMO sistema pero SIN framework.
+"""Baseline — el mismo flujo SIN framework.
 
-Hace a mano lo que luego delegamos a smolagents / Pydantic AI / LangGraph:
-recuperar contexto, pedir un resumen estructurado, validarlo y reintentar en un
-bucle. Sirve para mostrar en vivo qué responsabilidades asume cada framework.
+Hacemos a mano lo que smolagents / Pydantic AI / LangGraph organizan por ti:
+recuperar, generar estructurado, validar y reintentar en un bucle.
 
-Correr desde la raíz del proyecto:
-    python -m baseline.summarize_plain
+Ejecutar:  python -m baseline.summarize_plain
 """
 
 import os
@@ -18,58 +16,39 @@ from rag_core.schema import DocumentSummary
 from rag_core.validation import validar_resumen
 
 load_dotenv()
-
 rag = build_rag("data/resnet.pdf")
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-def construir_prompt(contexto: str, problemas: list[str]) -> str:
-    secciones = "\n".join(f"- {s}" for s in rag.sections)
-    feedback = ""
-    if problemas:
-        feedback = "\n\nEl intento anterior falló por:\n" + "\n".join(problemas) + "\nCorrígelo."
+def prompt(contexto: str, problemas: list[str]) -> str:
+    feedback = f"\n\nCorrige esto del intento anterior: {problemas}" if problemas else ""
     return (
-        "Resume el paper en varios puntos con base en el contexto.\n"
-        'Devuelve un JSON {"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
-        "Cada 'seccion' debe ser EXACTAMENTE una de estas etiquetas:\n"
-        f"{secciones}\n"
-        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas.\n\n"
+        "Resume el paper en puntos. Devuelve JSON "
+        '{"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
+        f"Cada 'seccion' debe ser una de: {', '.join(rag.sections)}.\n"
+        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español.\n\n"
         f"Contexto:\n{contexto}{feedback}"
     )
 
 
 def main() -> None:
-    # 1) Recuperar contexto (a mano).
-    contexto = "\n\n---\n\n".join(rag.retrieve("problema, método y resultados principales del paper"))
-
-    # 2) Generar -> validar -> reintentar (bucle a mano, sin framework).
+    contexto = "\n\n".join(rag.retrieve("problema, método y resultados del paper"))
     problemas: list[str] = []
+
     for intento in range(1, config.MAX_INTENTOS + 1):
-        print(f"\n--- Intento {intento} ---")
         respuesta = client.chat.completions.create(
             model=config.OPENAI_MODEL,
             response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": "Devuelves JSON válido en español."},
-                {"role": "user", "content": construir_prompt(contexto, problemas)},
-            ],
+            messages=[{"role": "user", "content": prompt(contexto, problemas)}],
         )
-        try:
-            resumen = DocumentSummary.model_validate_json(respuesta.choices[0].message.content)
-        except Exception as error:
-            problemas = [f"La salida no es un JSON válido del esquema: {error}"]
-            print("  JSON inválido:", error)
-            continue
-
+        resumen = DocumentSummary.model_validate_json(respuesta.choices[0].message.content)
         problemas = validar_resumen(resumen, rag.sections)
+        print(f"Intento {intento}: {'válido' if not problemas else problemas}")
         if not problemas:
-            print("  OK - resumen válido:")
-            for punto in resumen.puntos:
-                print(f"   - [{punto.seccion}] {punto.idea}")
-            return
-        print("  Problemas:", problemas)
+            break
 
-    print("\nSe agotaron los intentos sin un resumen válido.")
+    for punto in resumen.puntos:
+        print(f"- [{punto.seccion}] {punto.idea}")
 
 
 if __name__ == "__main__":
