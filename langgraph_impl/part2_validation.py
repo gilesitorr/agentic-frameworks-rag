@@ -12,6 +12,7 @@ Correr desde la raíz del proyecto:
     python -m langgraph_impl.part2_validation
 """
 
+import os
 from typing import TypedDict
 
 from dotenv import load_dotenv
@@ -25,7 +26,7 @@ from rag_core.validation import validar_resumen
 load_dotenv()
 
 rag = build_rag("data/resnet.pdf")
-client = OpenAI()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 class Estado(TypedDict):

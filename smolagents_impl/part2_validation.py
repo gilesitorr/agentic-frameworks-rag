@@ -69,10 +69,15 @@ def main() -> None:
         print(f"\n--- Intento {intento} ---")
         salida = agent.run(construir_tarea(feedback))
         try:
-            resumen = DocumentSummary.model_validate_json(_extraer_json(str(salida)))
+            # smolagents suele devolver el objeto ya parseado (un dict); si viniera
+            # como texto, extraemos y parseamos el JSON.
+            if isinstance(salida, str):
+                resumen = DocumentSummary.model_validate_json(_extraer_json(salida))
+            else:
+                resumen = DocumentSummary.model_validate(salida)
         except Exception as error:
-            feedback = f"La salida no es un JSON válido del esquema: {error}"
-            print("  JSON inválido:", error)
+            feedback = f"La salida no cumple el esquema esperado: {error}"
+            print("  Salida inválida:", error)
             continue
 
         problemas = validar_resumen(resumen, rag.sections)

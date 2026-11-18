@@ -58,6 +58,12 @@ data/                  # aquí va resnet.pdf (ver data/README.md)
    | **LangGraph** | Un **ciclo explícito en el grafo**: nodo `validar` + arista condicional que vuelve a `generar`. |
    | **Pydantic AI** (José) | Validadores de salida + reintento declarativo del propio framework. |
 
+   > **Tip para la demo:** en una corrida normal el resumen suele pasar a la
+   > primera, así que el reintento no se ve. Para **mostrarlo en vivo**, sube
+   > `MIN_SECCIONES_CITADAS` en [`rag_core/config.py`](rag_core/config.py) (p.ej.
+   > a `6`): el primer intento suele quedarse corto y verás cómo el reintento,
+   > con el feedback, lo corrige.
+
 ## Puesta en marcha
 
 ```powershell

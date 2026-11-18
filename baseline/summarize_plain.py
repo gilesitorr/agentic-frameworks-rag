@@ -8,6 +8,8 @@ Correr desde la raíz del proyecto:
     python -m baseline.summarize_plain
 """
 
+import os
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -18,7 +20,7 @@ from rag_core.validation import validar_resumen
 load_dotenv()
 
 rag = build_rag("data/resnet.pdf")
-client = OpenAI()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 def construir_prompt(contexto: str, problemas: list[str]) -> str:
