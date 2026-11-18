@@ -1,0 +1,15 @@
+# Entorno de Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Secretos
+.env
+
+# Datos (el PDF se descarga aparte, ver data/README.md)
+data/*.pdf
+
+# Persistencia de ChromaDB (si se usa cliente persistente)
+.chroma/
+chroma/
