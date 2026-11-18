@@ -21,3 +21,9 @@ TOP_K = 5
 # --- Generación (OpenAI) ---
 # Mismo modelo en las tres implementaciones.
 OPENAI_MODEL = "gpt-4o-mini"
+
+# --- Validación y reintentos (parte 2) ---
+# Mínimo de secciones distintas que debe citar un resumen para considerarse válido.
+MIN_SECCIONES_CITADAS = 3
+# Máximo de reintentos cuando la validación falla.
+MAX_INTENTOS = 3

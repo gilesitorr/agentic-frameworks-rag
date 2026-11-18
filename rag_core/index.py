@@ -1,5 +1,7 @@
 """Troceado + embeddings (fastembed) + almacenamiento en ChromaDB."""
 
+import uuid
+
 import chromadb
 from fastembed import TextEmbedding
 
@@ -26,7 +28,9 @@ def build_index(chunks: list[str]):
     embeddings = [vector.tolist() for vector in embedder.embed(chunks)]
 
     client = chromadb.Client()                    # cliente en memoria: se reconstruye cada corrida
-    collection = client.create_collection("doc")
+    # Nombre único: reconstruir el índice (p.ej. dos veces en el mismo proceso o en
+    # un notebook) no choca con una colección previa.
+    collection = client.create_collection(f"doc-{uuid.uuid4().hex[:8]}")
     collection.add(
         ids=[str(i) for i in range(len(chunks))],
         documents=chunks,

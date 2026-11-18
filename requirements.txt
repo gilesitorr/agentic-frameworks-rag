@@ -1,5 +1,6 @@
 # Núcleo RAG (compartido)
 pypdf>=5.0
+fonttools>=4.50    # mejor parseo de fuentes del PDF (evita warnings de pypdf)
 fastembed>=0.4
 chromadb>=0.5
 
