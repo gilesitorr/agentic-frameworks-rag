@@ -7,8 +7,9 @@ __pycache__/
 # Secretos
 .env
 
-# Datos (el PDF se descarga aparte, ver data/README.md)
+# Datos: ignora PDFs, salvo el paper de la demo (resnet) que sí se versiona.
 data/*.pdf
+!data/resnet.pdf
 
 # Persistencia de ChromaDB (si se usa cliente persistente)
 .chroma/
