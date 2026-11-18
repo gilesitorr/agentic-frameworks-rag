@@ -1,0 +1,26 @@
+[project]
+name = "agentic-frameworks-rag"
+version = "0.1.0"
+description = "Mismo RAG, tres frameworks de agentes (smolagents, Pydantic AI, LangGraph)."
+requires-python = ">=3.10"
+
+dependencies = [
+    # Núcleo RAG (compartido)
+    "pypdf>=5.0",
+    "fonttools>=4.50",   # mejor parseo de fuentes del PDF (evita warnings de pypdf)
+    "fastembed>=0.4",
+    "chromadb>=0.5",
+    # Modelo de generación (OpenAI, el mismo para las tres implementaciones)
+    "openai>=1.40",
+    # Frameworks de agentes
+    "smolagents>=1.14",
+    "langgraph>=0.2",
+    # Utilidades
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+# El proyecto son scripts que se corren desde la raíz (python -m ...),
+# no una librería instalable: uv solo gestiona el entorno.
+package = false

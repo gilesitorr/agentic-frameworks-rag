@@ -20,20 +20,20 @@ reintenta). La comparación a fondo está en [`docs/comparacion.md`](docs/compar
 
 ## Uso
 
+Usamos [uv](https://docs.astral.sh/uv/) para el entorno y las dependencias:
+
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+uv sync                   # crea el entorno e instala todo (lee pyproject.toml)
 copy .env.example .env    # pon tu OPENAI_API_KEY
 ```
 
 Descarga el paper en `data/resnet.pdf` (ver [`data/README.md`](data/README.md)) y corre,
-desde la raíz del proyecto:
+desde la raíz del proyecto (`uv run` activa el entorno por ti):
 
 ```powershell
-python -m smolagents_impl.part1_basic
-python -m langgraph_impl.part2_validation
-python -m baseline.summarize_plain
+uv run python -m smolagents_impl.part1_basic
+uv run python -m langgraph_impl.part2_validation
+uv run python -m baseline.summarize_plain
 ```
 
 ## Stack
