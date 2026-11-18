@@ -1,10 +1,10 @@
 # Documento fuente
 
-La demo resume el paper de **ResNet** ("Deep Residual Learning for Image Recognition").
+La demo resume el paper de **ResNet** ("Deep Residual Learning for Image Recognition"),
+incluido aquí como `resnet.pdf` para que la demo corra sin pasos extra.
 
-Descarga el PDF y guárdalo aquí como `resnet.pdf`:
+- Fuente: https://arxiv.org/pdf/1512.03385
+- Copyright de sus autores; se incluye solo con fines de la demo.
 
-- https://arxiv.org/pdf/1512.03385
-
-No se versiona en git; cada quien lo descarga, así todas las implementaciones resumen
-el mismo documento.
+Es el **mismo documento** para las tres implementaciones, para que la única variable que
+cambie sea el framework.
