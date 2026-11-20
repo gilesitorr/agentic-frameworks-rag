@@ -15,6 +15,9 @@ data/*.pdf
 .chroma/
 chroma/
 
+# Caché del modelo de embeddings (fastembed lo descarga/guarda aquí)
+.models/
+
 # Material local de la charla (no se versiona)
 # Los scripts (demo/*.py) sí se versionan; el README de la carpeta y el guion no.
 demo/README.md

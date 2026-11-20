@@ -1,3 +1,0 @@
-# The vendored model must keep its exact bytes. Never convert line endings, or
-# fastembed's integrity check fails on checkout and it re-downloads the model.
-.models/** -text
