@@ -59,7 +59,7 @@ def build_rag(pdf_path: str) -> Rag:
     text = _read_pdf(pdf_path)
     chunks = _chunks(text)
 
-    embedder = TextEmbedding(model_name=config.EMBEDDING_MODEL)
+    embedder = TextEmbedding(model_name=config.EMBEDDING_MODEL, cache_dir=str(config.CACHE_DIR))
     vectors = [vec.tolist() for vec in embedder.embed(chunks)]
 
     # Unique name: rebuilding the index in the same process won't clash with another collection.

@@ -26,11 +26,12 @@ We use [uv](https://docs.astral.sh/uv/) for the environment and
 
 ```powershell
 uv sync                   # creates the environment and installs everything (reads pyproject.toml)
-copy .env.example .env    # add your OPENAI_API_KEY
+cp .env.example .env      # add your OPENAI_API_KEY   (Windows: copy .env.example .env)
 ```
 
-The paper is included at `data/resnet.pdf` (see [`data/README.md`](data/README.md)). Run any
-demo with a recipe (list them all with `just`):
+The paper (`data/resnet.pdf`) and the embedding model (`.models/`) are vendored in the repo,
+so the demo runs offline on any OS — no HuggingFace download needed. Run any demo with a
+recipe (list them all with `just`):
 
 ```powershell
 just rag-internals     # offline: PDF sections + semantic search

@@ -1,8 +1,14 @@
 """Shared parameters. Every implementation uses these values, so that the only
 difference between frameworks is the framework itself."""
 
+import pathlib
+
 # Embeddings (fastembed, runs locally)
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+
+# fastembed looks for the model here. It is vendored in the repo (.models/), so
+# the demo runs offline on any OS — no HuggingFace download needed.
+CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".models"
 
 # Document chunking (in characters)
 CHUNK_SIZE = 1000

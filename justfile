@@ -15,7 +15,7 @@ default:
 setup:
     uv sync
 
-# Pre-download the embedding model (run once before the talk)
+# Sanity check: load the vendored embedding model (it lives in .models/)
 warmup:
     uv run python -c "from rag_core import build_rag; build_rag('data/resnet.pdf'); print('ready')"
 
