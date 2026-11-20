@@ -1,13 +1,13 @@
-"""smolagents — Parte 2: resumen estructurado + validación + reintentos.
+"""smolagents — Part 2: structured summary + validation + retries.
 
-smolagents nos da el ciclo de herramientas, pero la validación y el reintento los
-orquestamos nosotros: un bucle alrededor de agent.run (compáralo con LangGraph,
-donde el reintento es parte del grafo).
+smolagents gives us the tool loop, but we orchestrate validation and retries
+ourselves: a loop around agent.run (compare it with LangGraph, where the retry
+is part of the graph).
 
-Además, smolagents no garantiza salida estructurada: devuelve un dict o texto JSON,
-así que lo normalizamos antes de validar.
+Also, smolagents does not guarantee structured output: it returns a dict or JSON
+text, so we normalize it before validating.
 
-Ejecutar:  python -m smolagents_impl.part2_validation
+Run:  python -m smolagents_impl.part2_validation
 """
 
 import json
@@ -19,7 +19,7 @@ from smolagents import OpenAIServerModel, ToolCallingAgent, tool
 
 from rag_core import build_rag, config
 from rag_core.schema import DocumentSummary
-from rag_core.validation import validar_resumen
+from rag_core.validation import validate_summary
 
 load_dotenv()
 rag = build_rag("data/resnet.pdf")
@@ -27,10 +27,10 @@ rag = build_rag("data/resnet.pdf")
 
 @tool
 def search_document(query: str) -> str:
-    """Devuelve los fragmentos del documento más relevantes para la consulta.
+    """Return the document chunks most relevant to the query.
 
     Args:
-        query: Lo que se busca en el documento.
+        query: What to search for in the document.
     """
     return "\n\n".join(rag.retrieve(query))
 
@@ -41,38 +41,38 @@ agent = ToolCallingAgent(
 )
 
 
-def tarea(problemas: list[str]) -> str:
-    feedback = f"\n\nCorrige esto del intento anterior: {problemas}" if problemas else ""
+def task(problems: list[str]) -> str:
+    feedback = f"\n\nFix this from the previous attempt: {problems}" if problems else ""
     return (
-        "Resume el paper usando search_document. Devuelve JSON "
-        '{"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
-        f"Cada 'seccion' debe ser una de: {', '.join(rag.sections)}.\n"
-        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español.{feedback}"
+        "Summarize the paper using search_document. Return JSON "
+        '{"points": [{"idea": "...", "section": "..."}]}.\n'
+        f"Each 'section' must be one of: {', '.join(rag.sections)}.\n"
+        f"Cite at least {config.MIN_SECTIONS_CITED} distinct sections.{feedback}"
     )
 
 
 def main() -> None:
-    problemas: list[str] = []
-    resumen = None
-    for intento in range(1, config.MAX_INTENTOS + 1):
-        salida = agent.run(tarea(problemas))
+    problems: list[str] = []
+    summary = None
+    for attempt in range(1, config.MAX_ATTEMPTS + 1):
+        output = agent.run(task(problems))
         try:
-            # smolagents devuelve la salida como dict o como texto JSON.
-            datos = salida if isinstance(salida, dict) else json.loads(str(salida))
-            resumen = DocumentSummary.model_validate(datos)
+            # smolagents returns the output as a dict or as JSON text.
+            data = output if isinstance(output, dict) else json.loads(str(output))
+            summary = DocumentSummary.model_validate(data)
         except (json.JSONDecodeError, ValidationError) as error:
-            problemas = [f"La salida no respeta el esquema: {error}"]
-            print(f"Intento {intento}: salida inválida")
+            problems = [f"The output does not match the schema: {error}"]
+            print(f"Attempt {attempt}: invalid output")
             continue
 
-        problemas = validar_resumen(resumen, rag.sections)
-        print(f"Intento {intento}: {'válido' if not problemas else problemas}")
-        if not problemas:
+        problems = validate_summary(summary, rag.sections)
+        print(f"Attempt {attempt}: {'valid' if not problems else problems}")
+        if not problems:
             break
 
-    if resumen:
-        for punto in resumen.puntos:
-            print(f"- [{punto.seccion}] {punto.idea}")
+    if summary:
+        for point in summary.points:
+            print(f"- [{point.section}] {point.idea}")
 
 
 if __name__ == "__main__":

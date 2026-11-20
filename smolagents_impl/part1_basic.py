@@ -1,9 +1,9 @@
-"""smolagents — Parte 1: resumen básico.
+"""smolagents — Part 1: basic summary.
 
-El agente tiene una herramienta (buscar en el documento) y una tarea (resumir).
-smolagents maneja el ciclo razonar ↔ usar herramienta ↔ responder.
+The agent has one tool (search the document) and one task (summarize).
+smolagents handles the reason ↔ use tool ↔ answer loop.
 
-Ejecutar:  python -m smolagents_impl.part1_basic
+Run:  python -m smolagents_impl.part1_basic
 """
 
 import os
@@ -19,10 +19,10 @@ rag = build_rag("data/resnet.pdf")
 
 @tool
 def search_document(query: str) -> str:
-    """Devuelve los fragmentos del documento más relevantes para la consulta.
+    """Return the document chunks most relevant to the query.
 
     Args:
-        query: Lo que se busca en el documento.
+        query: What to search for in the document.
     """
     return "\n\n".join(rag.retrieve(query))
 
@@ -33,4 +33,4 @@ agent = ToolCallingAgent(
 )
 
 if __name__ == "__main__":
-    print(agent.run("Resume el paper: problema, método y resultados. Responde en español."))
+    print(agent.run("Summarize the paper: problem, method and results."))

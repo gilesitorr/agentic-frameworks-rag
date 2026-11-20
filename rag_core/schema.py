@@ -1,12 +1,12 @@
-"""Esquema del resumen estructurado (parte 2)."""
+"""Schema for the structured summary (part 2)."""
 
 from pydantic import BaseModel
 
 
 class SummaryPoint(BaseModel):
-    idea: str      # una idea del paper
-    seccion: str   # la sección que la respalda (etiqueta exacta)
+    idea: str       # one idea from the paper
+    section: str    # the section that backs it (exact label)
 
 
 class DocumentSummary(BaseModel):
-    puntos: list[SummaryPoint]
+    points: list[SummaryPoint]

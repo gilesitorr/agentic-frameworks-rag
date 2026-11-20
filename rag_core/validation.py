@@ -1,18 +1,18 @@
-"""Validación del resumen (parte 2): cada punto debe citar una sección real del
-documento, y hay que cubrir al menos MIN_SECCIONES_CITADAS secciones distintas."""
+"""Summary validation (part 2): every point must cite a real section of the
+document, and at least MIN_SECTIONS_CITED distinct sections must be covered."""
 
 from . import config
 from .schema import DocumentSummary
 
 
-def validar_resumen(resumen: DocumentSummary, secciones: list[str]) -> list[str]:
-    """Lista de problemas encontrados (vacía = resumen válido)."""
-    validas = set(secciones)
-    citadas = [punto.seccion for punto in resumen.puntos]
+def validate_summary(summary: DocumentSummary, sections: list[str]) -> list[str]:
+    """List of problems found (empty = valid summary)."""
+    valid = set(sections)
+    cited = [point.section for point in summary.points]
 
-    problemas = [f"La sección '{s}' no existe en el documento." for s in citadas if s not in validas]
-    if len(set(citadas)) < config.MIN_SECCIONES_CITADAS:
-        problemas.append(
-            f"Cita {len(set(citadas))} secciones distintas; se requieren {config.MIN_SECCIONES_CITADAS}."
+    problems = [f"Section '{s}' is not in the document." for s in cited if s not in valid]
+    if len(set(cited)) < config.MIN_SECTIONS_CITED:
+        problems.append(
+            f"Cites {len(set(cited))} distinct sections; {config.MIN_SECTIONS_CITED} are required."
         )
-    return problemas
+    return problems

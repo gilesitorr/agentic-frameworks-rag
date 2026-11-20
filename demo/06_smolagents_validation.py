@@ -1,5 +1,5 @@
-"""Demo 06 — smolagents, parte 2 (validación + reintentos).
-    python demo/06_smolagents_validacion.py
+"""Demo 06 — smolagents, part 2 (validation + retries).
+    python demo/06_smolagents_validation.py
 """
 
 import pathlib

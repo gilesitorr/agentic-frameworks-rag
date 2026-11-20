@@ -1,9 +1,9 @@
-"""LangGraph — Parte 2: resumen estructurado + validación + reintentos.
+"""LangGraph — Part 2: structured summary + validation + retries.
 
-El reintento es un ciclo explícito en el grafo: generar → validar → si no es
-válido, volver a generar con el feedback.
+The retry is an explicit cycle in the graph: generate → validate → if it is
+not valid, go back to generate with the feedback.
 
-Ejecutar:  python -m langgraph_impl.part2_validation
+Run:  python -m langgraph_impl.part2_validation
 """
 
 import os
@@ -15,65 +15,65 @@ from openai import OpenAI
 
 from rag_core import build_rag, config
 from rag_core.schema import DocumentSummary
-from rag_core.validation import validar_resumen
+from rag_core.validation import validate_summary
 
 load_dotenv()
 rag = build_rag("data/resnet.pdf")
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-class Estado(TypedDict):
-    contexto: str
-    resumen: DocumentSummary
-    problemas: list[str]
-    intentos: int
+class State(TypedDict):
+    context: str
+    summary: DocumentSummary
+    problems: list[str]
+    attempts: int
 
 
-def recuperar(estado: Estado) -> dict:
-    fragmentos = rag.retrieve("problema, método y resultados del paper")
-    return {"contexto": "\n\n".join(fragmentos), "intentos": 0, "problemas": []}
+def retrieve(state: State) -> dict:
+    chunks = rag.retrieve("the paper's problem, method and results")
+    return {"context": "\n\n".join(chunks), "attempts": 0, "problems": []}
 
 
-def generar(estado: Estado) -> dict:
-    feedback = f"\n\nCorrige esto del intento anterior: {estado['problemas']}" if estado["problemas"] else ""
+def generate(state: State) -> dict:
+    feedback = f"\n\nFix this from the previous attempt: {state['problems']}" if state["problems"] else ""
     prompt = (
-        "Resume el paper en puntos. Devuelve JSON "
-        '{"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
-        f"Cada 'seccion' debe ser una de: {', '.join(rag.sections)}.\n"
-        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español.\n\n"
-        f"Contexto:\n{estado['contexto']}{feedback}"
+        "Summarize the paper as points. Return JSON "
+        '{"points": [{"idea": "...", "section": "..."}]}.\n'
+        f"Each 'section' must be one of: {', '.join(rag.sections)}.\n"
+        f"Cite at least {config.MIN_SECTIONS_CITED} distinct sections.\n\n"
+        f"Context:\n{state['context']}{feedback}"
     )
-    respuesta = client.chat.completions.create(
+    response = client.chat.completions.create(
         model=config.OPENAI_MODEL,
         response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
     )
-    resumen = DocumentSummary.model_validate_json(respuesta.choices[0].message.content)
-    return {"resumen": resumen, "intentos": estado["intentos"] + 1}
+    summary = DocumentSummary.model_validate_json(response.choices[0].message.content)
+    return {"summary": summary, "attempts": state["attempts"] + 1}
 
 
-def validar(estado: Estado) -> dict:
-    return {"problemas": validar_resumen(estado["resumen"], rag.sections)}
+def validate(state: State) -> dict:
+    return {"problems": validate_summary(state["summary"], rag.sections)}
 
 
-def seguir(estado: Estado) -> str:
-    if not estado["problemas"] or estado["intentos"] >= config.MAX_INTENTOS:
-        return "fin"
-    return "reintentar"
+def route(state: State) -> str:
+    if not state["problems"] or state["attempts"] >= config.MAX_ATTEMPTS:
+        return "end"
+    return "retry"
 
 
-grafo = StateGraph(Estado)
-grafo.add_node("recuperar", recuperar)
-grafo.add_node("generar", generar)
-grafo.add_node("validar", validar)
-grafo.add_edge(START, "recuperar")
-grafo.add_edge("recuperar", "generar")
-grafo.add_edge("generar", "validar")
-grafo.add_conditional_edges("validar", seguir, {"reintentar": "generar", "fin": END})
-app = grafo.compile()
+graph = StateGraph(State)
+graph.add_node("retrieve", retrieve)
+graph.add_node("generate", generate)
+graph.add_node("validate", validate)
+graph.add_edge(START, "retrieve")
+graph.add_edge("retrieve", "generate")
+graph.add_edge("generate", "validate")
+graph.add_conditional_edges("validate", route, {"retry": "generate", "end": END})
+app = graph.compile()
 
 if __name__ == "__main__":
-    estado = app.invoke({})
-    print(f"Intentos: {estado['intentos']} · válido: {not estado['problemas']}")
-    for punto in estado["resumen"].puntos:
-        print(f"- [{punto.seccion}] {punto.idea}")
+    state = app.invoke({})
+    print(f"Attempts: {state['attempts']} · valid: {not state['problems']}")
+    for point in state["summary"].points:
+        print(f"- [{point.section}] {point.idea}")

@@ -1,5 +1,5 @@
-"""Demo 03 — smolagents, parte 1 (básica).
-    python demo/03_smolagents_basico.py
+"""Demo 03 — smolagents, part 1 (basic).
+    python demo/03_smolagents_basic.py
 """
 
 import pathlib

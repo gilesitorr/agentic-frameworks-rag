@@ -1,5 +1,5 @@
-"""Demo 05 — Baseline: el mismo flujo SIN framework.
-    python demo/05_sin_framework.py
+"""Demo 05 — Baseline: the same flow WITHOUT a framework.
+    python demo/05_no_framework.py
 """
 
 import pathlib

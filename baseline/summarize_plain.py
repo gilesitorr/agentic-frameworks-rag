@@ -1,9 +1,9 @@
-"""Baseline — el mismo flujo SIN framework.
+"""Baseline — the same flow WITHOUT a framework.
 
-Hacemos a mano lo que smolagents / Pydantic AI / LangGraph organizan por ti:
-recuperar, generar estructurado, validar y reintentar en un bucle.
+We do by hand what smolagents / Pydantic AI / LangGraph organize for you:
+retrieve, generate structured output, validate and retry in a loop.
 
-Ejecutar:  python -m baseline.summarize_plain
+Run:  python -m baseline.summarize_plain
 """
 
 import os
@@ -13,42 +13,42 @@ from openai import OpenAI
 
 from rag_core import build_rag, config
 from rag_core.schema import DocumentSummary
-from rag_core.validation import validar_resumen
+from rag_core.validation import validate_summary
 
 load_dotenv()
 rag = build_rag("data/resnet.pdf")
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-def prompt(contexto: str, problemas: list[str]) -> str:
-    feedback = f"\n\nCorrige esto del intento anterior: {problemas}" if problemas else ""
+def prompt(context: str, problems: list[str]) -> str:
+    feedback = f"\n\nFix this from the previous attempt: {problems}" if problems else ""
     return (
-        "Resume el paper en puntos. Devuelve JSON "
-        '{"puntos": [{"idea": "...", "seccion": "..."}]}.\n'
-        f"Cada 'seccion' debe ser una de: {', '.join(rag.sections)}.\n"
-        f"Cita al menos {config.MIN_SECCIONES_CITADAS} secciones distintas. Responde en español.\n\n"
-        f"Contexto:\n{contexto}{feedback}"
+        "Summarize the paper as points. Return JSON "
+        '{"points": [{"idea": "...", "section": "..."}]}.\n'
+        f"Each 'section' must be one of: {', '.join(rag.sections)}.\n"
+        f"Cite at least {config.MIN_SECTIONS_CITED} distinct sections.\n\n"
+        f"Context:\n{context}{feedback}"
     )
 
 
 def main() -> None:
-    contexto = "\n\n".join(rag.retrieve("problema, método y resultados del paper"))
-    problemas: list[str] = []
+    context = "\n\n".join(rag.retrieve("the paper's problem, method and results"))
+    problems: list[str] = []
 
-    for intento in range(1, config.MAX_INTENTOS + 1):
-        respuesta = client.chat.completions.create(
+    for attempt in range(1, config.MAX_ATTEMPTS + 1):
+        response = client.chat.completions.create(
             model=config.OPENAI_MODEL,
             response_format={"type": "json_object"},
-            messages=[{"role": "user", "content": prompt(contexto, problemas)}],
+            messages=[{"role": "user", "content": prompt(context, problems)}],
         )
-        resumen = DocumentSummary.model_validate_json(respuesta.choices[0].message.content)
-        problemas = validar_resumen(resumen, rag.sections)
-        print(f"Intento {intento}: {'válido' if not problemas else problemas}")
-        if not problemas:
+        summary = DocumentSummary.model_validate_json(response.choices[0].message.content)
+        problems = validate_summary(summary, rag.sections)
+        print(f"Attempt {attempt}: {'valid' if not problems else problems}")
+        if not problems:
             break
 
-    for punto in resumen.puntos:
-        print(f"- [{punto.seccion}] {punto.idea}")
+    for point in summary.points:
+        print(f"- [{point.section}] {point.idea}")
 
 
 if __name__ == "__main__":

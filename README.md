@@ -1,41 +1,47 @@
-# Agentic AI en la práctica — RAG con tres frameworks
+# Agentic AI in practice — RAG with three frameworks
 
-Demo de la charla *"Agentic AI en la práctica"* (José Arenas y Gil Rodríguez).
+Demo for the talk *"Agentic AI in practice"* (José Arenas and Gil Rodríguez).
 
-Resolvemos **el mismo problema** —un RAG que resume el paper de ResNet— con tres
-frameworks, para comparar cómo manejan la ejecución, la validación y los reintentos.
-Lo único que cambia entre implementaciones es **el framework**: mismo PDF, mismo RAG y
-mismo modelo (ver [`rag_core/config.py`](rag_core/config.py)).
+We solve **the same problem** —a RAG that summarizes the ResNet paper— with three
+frameworks, to compare how they handle execution, validation and retries.
+The only thing that changes between implementations is **the framework**: same PDF, same
+RAG and same model (see [`rag_core/config.py`](rag_core/config.py)).
 
-| Framework | Carpeta |
+| Framework | Folder |
 |---|---|
 | smolagents | `smolagents_impl/` |
 | LangGraph | `langgraph_impl/` |
 | Pydantic AI | `pydantic_impl/` (José) |
-| Sin framework | `baseline/` |
+| No framework | `baseline/` |
 
-Cada demo tiene dos partes: **básica** (recuperar y resumir) y **validación +
-reintentos** (el resumen cita secciones del documento; si la validación falla, se
-reintenta). La comparación a fondo está en [`docs/comparacion.md`](docs/comparacion.md).
+Each demo has two parts: **basic** (retrieve and summarize) and **validation +
+retries** (the summary cites sections of the document; if validation fails, it retries).
+The in-depth comparison is in [`docs/comparison.md`](docs/comparison.md), and the flow
+diagrams are in [`docs/diagrams.md`](docs/diagrams.md).
 
-## Uso
+## Usage
 
-Usamos [uv](https://docs.astral.sh/uv/) para el entorno y las dependencias:
-
-```powershell
-uv sync                   # crea el entorno e instala todo (lee pyproject.toml)
-copy .env.example .env    # pon tu OPENAI_API_KEY
-```
-
-Descarga el paper en `data/resnet.pdf` (ver [`data/README.md`](data/README.md)) y corre,
-desde la raíz del proyecto (`uv run` activa el entorno por ti):
+We use [uv](https://docs.astral.sh/uv/) for the environment and
+[just](https://just.systems/) for the demo recipes.
 
 ```powershell
-uv run python -m smolagents_impl.part1_basic
-uv run python -m langgraph_impl.part2_validation
-uv run python -m baseline.summarize_plain
+uv sync                   # creates the environment and installs everything (reads pyproject.toml)
+copy .env.example .env    # add your OPENAI_API_KEY
 ```
+
+The paper is included at `data/resnet.pdf` (see [`data/README.md`](data/README.md)). Run any
+demo with a recipe (list them all with `just`):
+
+```powershell
+just rag-internals     # offline: PDF sections + semantic search
+just smolagents-2      # smolagents, part 2 (validation + retries)
+just langgraph-2       # LangGraph, part 2 (validation + retries)
+just force-retry       # force a retry live
+```
+
+Each recipe just wraps `uv run ...`, so you can always run the module directly instead,
+e.g. `uv run python -m smolagents_impl.part1_basic`.
 
 ## Stack
 
-fastembed (embeddings) · ChromaDB (base vectorial) · OpenAI `gpt-4o-mini` (generación)
+fastembed (embeddings) · ChromaDB (vector store) · OpenAI `gpt-4o-mini` (generation)

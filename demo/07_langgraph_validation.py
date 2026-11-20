@@ -1,5 +1,5 @@
-"""Demo 07 — LangGraph, parte 2 (validación + reintentos).
-    python demo/07_langgraph_validacion.py
+"""Demo 07 — LangGraph, part 2 (validation + retries).
+    python demo/07_langgraph_validation.py
 """
 
 import pathlib

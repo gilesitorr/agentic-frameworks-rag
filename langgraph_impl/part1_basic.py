@@ -1,9 +1,9 @@
-"""LangGraph — Parte 1: resumen básico como grafo explícito.
+"""LangGraph — Part 1: basic summary as an explicit graph.
 
-Definimos el flujo como nodos + aristas: recuperar → generar. El control es
-explícito, a diferencia de smolagents, que esconde el ciclo dentro del agente.
+We define the flow as nodes + edges: retrieve → generate. The control is
+explicit, unlike smolagents, which hides the loop inside the agent.
 
-Ejecutar:  python -m langgraph_impl.part1_basic
+Run:  python -m langgraph_impl.part1_basic
 """
 
 import os
@@ -20,30 +20,30 @@ rag = build_rag("data/resnet.pdf")
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-class Estado(TypedDict):
-    contexto: str
-    resumen: str
+class State(TypedDict):
+    context: str
+    summary: str
 
 
-def recuperar(estado: Estado) -> dict:
-    return {"contexto": "\n\n".join(rag.retrieve("problema, método y resultados del paper"))}
+def retrieve(state: State) -> dict:
+    return {"context": "\n\n".join(rag.retrieve("the paper's problem, method and results"))}
 
 
-def generar(estado: Estado) -> dict:
-    respuesta = client.chat.completions.create(
+def generate(state: State) -> dict:
+    response = client.chat.completions.create(
         model=config.OPENAI_MODEL,
-        messages=[{"role": "user", "content": f"Resume el paper en español:\n\n{estado['contexto']}"}],
+        messages=[{"role": "user", "content": f"Summarize the paper:\n\n{state['context']}"}],
     )
-    return {"resumen": respuesta.choices[0].message.content}
+    return {"summary": response.choices[0].message.content}
 
 
-grafo = StateGraph(Estado)
-grafo.add_node("recuperar", recuperar)
-grafo.add_node("generar", generar)
-grafo.add_edge(START, "recuperar")
-grafo.add_edge("recuperar", "generar")
-grafo.add_edge("generar", END)
-app = grafo.compile()
+graph = StateGraph(State)
+graph.add_node("retrieve", retrieve)
+graph.add_node("generate", generate)
+graph.add_edge(START, "retrieve")
+graph.add_edge("retrieve", "generate")
+graph.add_edge("generate", END)
+app = graph.compile()
 
 if __name__ == "__main__":
-    print(app.invoke({})["resumen"])
+    print(app.invoke({})["summary"])

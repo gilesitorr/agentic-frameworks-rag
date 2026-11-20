@@ -1,5 +1,5 @@
-"""Demo 04 — LangGraph, parte 1 (básica).
-    python demo/04_langgraph_basico.py
+"""Demo 04 — LangGraph, part 1 (basic).
+    python demo/04_langgraph_basic.py
 """
 
 import pathlib
