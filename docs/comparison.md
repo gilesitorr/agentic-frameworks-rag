@@ -5,10 +5,13 @@ All of this comes from building and running the same system in the three framewo
 ## The controlled experiment
 
 Same problem (summarize ResNet), same stack (fastembed + ChromaDB + `gpt-4o-mini`),
-same PDF. The only thing that changes is the framework.
+same PDF. Besides the framework, the implementations differ in pattern: the baseline and
+LangGraph are **workflows** (one fixed query, then one LLM call), while smolagents and
+Pydantic AI are **agents** (the LLM decides what to search, through a tool).
 
-> Since the model and the RAG are identical, **all three summarize equally well**. The
-> framework does not improve the output; it changes **how you build and control it**.
+> The model and the RAG are identical, so the framework does not make the LLM write better.
+> What shows in the output is the pattern: the agents search several times and cover more
+> sections, while the workflows only see the 5 chunks of their single query.
 
 ## The frameworks at a glance
 

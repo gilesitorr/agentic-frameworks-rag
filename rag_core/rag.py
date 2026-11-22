@@ -1,7 +1,7 @@
 """Shared RAG engine: from the PDF to retrievable chunks + the list of sections.
 
-It is identical for every implementation, so that the only thing that changes
-between frameworks is the framework itself.
+It is identical for every implementation: what differs is how each one orchestrates
+retrieval and generation on top of it.
 """
 
 import re

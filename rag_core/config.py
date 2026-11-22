@@ -1,5 +1,5 @@
-"""Shared parameters. Every implementation uses these values, so that the only
-difference between frameworks is the framework itself."""
+"""Shared parameters. Every implementation uses these values, so the PDF, the RAG
+and the model are the same everywhere."""
 
 import pathlib
 

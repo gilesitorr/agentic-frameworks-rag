@@ -4,15 +4,20 @@ Demo for the talk *"Agentic AI in practice"* (José Arenas and Gil Rodríguez).
 
 We solve **the same problem** —a RAG that summarizes the ResNet paper— with three
 frameworks, to compare how they handle execution, validation and retries.
-The only thing that changes between implementations is **the framework**: same PDF, same
-RAG and same model (see [`rag_core/config.py`](rag_core/config.py)).
+Every implementation uses the same PDF, RAG and model (see
+[`rag_core/config.py`](rag_core/config.py)). Besides the framework, they also differ in
+**pattern**, each following the way its framework is typically used:
 
-| Framework | Folder |
-|---|---|
-| smolagents | `smolagents_impl/` |
-| LangGraph | `langgraph_impl/` |
-| Pydantic AI | `pydantic_impl/` |
-| No framework | `baseline/` |
+- **Workflow:** your code runs one fixed query, then a single LLM call writes the summary.
+- **Agent:** the LLM gets a `search_document` tool and decides what to search, and how often,
+  before writing the summary.
+
+| Implementation | Folder | Pattern |
+|---|---|---|
+| No framework | `baseline/` | workflow |
+| smolagents | `smolagents_impl/` | agent |
+| Pydantic AI | `pydantic_impl/` | agent |
+| LangGraph | `langgraph_impl/` | workflow |
 
 Each demo has two parts: **basic** (retrieve and summarize) and **validation +
 retries** (the summary cites sections of the document; if validation fails, it retries).
