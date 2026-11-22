@@ -19,6 +19,7 @@ chroma/
 .models/
 
 # Local talk material (not versioned)
-# The demo/*.py scripts are versioned; the folder README and the script are not.
+# The demo/*.py scripts are versioned; the folder README, the script and the slides are not.
 demo/README.md
 docs/guion-maestro.md
+slides/
