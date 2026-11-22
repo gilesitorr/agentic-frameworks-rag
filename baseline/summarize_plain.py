@@ -2,6 +2,8 @@
 
 We do by hand what smolagents / Pydantic AI / LangGraph organize for you:
 retrieve, generate structured output, validate and retry in a loop.
+Only the OpenAI SDK talks to the model; pydantic (the validation library, not
+Pydantic AI) just parses the shared schema. No agent framework is involved.
 
 Run:  python -m baseline.summarize_plain
 """
