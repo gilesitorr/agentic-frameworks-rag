@@ -3,7 +3,7 @@
 We define the flow as nodes + edges: retrieve → generate. The control is
 explicit, unlike smolagents, which hides the loop inside the agent.
 
-Run:  python -m langgraph_impl.basic
+Run:  python -m langgraph_impl.part1_basic
 """
 
 import os

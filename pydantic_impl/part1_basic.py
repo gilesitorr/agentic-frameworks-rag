@@ -5,7 +5,7 @@ Pydantic AI runs the reason ↔ use tool ↔ answer loop, builds the tool schema
 the type hints and docstring, and validates the answer against the Pydantic model
 (asking the model to fix it if it doesn't match).
 
-Run:  python -m pydantic_impl.basic
+Run:  python -m pydantic_impl.part1_basic
 """
 
 from dotenv import load_dotenv

@@ -49,7 +49,7 @@ uv run just force-retry pydantic  # force a retry live (baseline, smolagents, la
 
 If you have `just` installed globally, you can drop the `uv run` prefix. Each recipe just
 wraps `uv run ...`, so you can always run the module directly instead,
-e.g. `uv run python -m smolagents_impl.basic`.
+e.g. `uv run python -m smolagents_impl.part1_basic`.
 
 ## Stack
 

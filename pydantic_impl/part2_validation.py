@@ -5,7 +5,7 @@ instructions, and an output validator runs the shared rule. When it fails we rai
 ModelRetry: Pydantic AI sends the problems back to the model and asks again, up to
 `retries` times. There is no loop of ours (compare it with smolagents and LangGraph).
 
-Run:  python -m pydantic_impl.validation
+Run:  python -m pydantic_impl.part2_validation
 """
 
 from dotenv import load_dotenv

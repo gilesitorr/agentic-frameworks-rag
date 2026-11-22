@@ -33,27 +33,27 @@ baseline:
 
 # smolagents, basic
 smolagents-basic:
-    uv run python -m smolagents_impl.basic
+    uv run python -m smolagents_impl.part1_basic
 
 # LangGraph, basic
 langgraph-basic:
-    uv run python -m langgraph_impl.basic
+    uv run python -m langgraph_impl.part1_basic
 
 # Pydantic AI, basic
 pydantic-basic:
-    uv run python -m pydantic_impl.basic
+    uv run python -m pydantic_impl.part1_basic
 
 # smolagents, validation (structured output + retries)
 smolagents-validation:
-    uv run python -m smolagents_impl.validation
+    uv run python -m smolagents_impl.part2_validation
 
 # LangGraph, validation (structured output + retries)
 langgraph-validation:
-    uv run python -m langgraph_impl.validation
+    uv run python -m langgraph_impl.part2_validation
 
 # Pydantic AI, validation (structured output + retries)
 pydantic-validation:
-    uv run python -m pydantic_impl.validation
+    uv run python -m pydantic_impl.part2_validation
 
 # Force a retry live (temporary high threshold): baseline, smolagents, langgraph or pydantic
 force-retry framework="baseline":

@@ -7,7 +7,7 @@ is part of the graph).
 Also, smolagents does not guarantee structured output: it returns a dict or JSON
 text, so we normalize it before validating.
 
-Run:  python -m smolagents_impl.validation
+Run:  python -m smolagents_impl.part2_validation
 """
 
 import json

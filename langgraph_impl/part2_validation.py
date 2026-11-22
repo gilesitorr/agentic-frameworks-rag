@@ -3,7 +3,7 @@
 The retry is an explicit cycle in the graph: generate → validate → if it is
 not valid, go back to generate with the feedback.
 
-Run:  python -m langgraph_impl.validation
+Run:  python -m langgraph_impl.part2_validation
 """
 
 import os

@@ -15,9 +15,9 @@ from rag_core import config
 
 VALIDATION = {
     "baseline": "baseline.summarize_plain",
-    "smolagents": "smolagents_impl.validation",
-    "langgraph": "langgraph_impl.validation",
-    "pydantic": "pydantic_impl.validation",
+    "smolagents": "smolagents_impl.part2_validation",
+    "langgraph": "langgraph_impl.part2_validation",
+    "pydantic": "pydantic_impl.part2_validation",
 }
 
 config.MIN_SECTIONS_CITED = 8   # temporary, just for this run
