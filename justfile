@@ -19,34 +19,34 @@ setup:
 warmup:
     uv run python -c "from rag_core import build_rag; build_rag('data/resnet.pdf'); print('ready')"
 
-# 01 — RAG internals: sections + semantic search (offline, no OpenAI)
+# RAG internals: sections + semantic search (offline, no OpenAI)
 rag-internals:
-    uv run python demo/01_rag_internals.py
+    uv run python demo/rag_internals.py
 
-# 02 — The validation rule: good vs. bad summary (offline, no OpenAI)
+# The validation rule: good vs. bad summary (offline, no OpenAI)
 validation:
-    uv run python demo/02_validation.py
+    uv run python demo/validation_rule.py
 
-# 03 — smolagents, part 1 (basic)
+# smolagents, part 1 (basic)
 smolagents-1:
     uv run python -m smolagents_impl.part1_basic
 
-# 04 — LangGraph, part 1 (basic)
+# LangGraph, part 1 (basic)
 langgraph-1:
     uv run python -m langgraph_impl.part1_basic
 
-# 05 — Baseline: the same flow with no framework
+# Baseline: the same flow with no framework
 baseline:
     uv run python -m baseline.summarize_plain
 
-# 06 — smolagents, part 2 (validation + retries)
+# smolagents, part 2 (validation + retries)
 smolagents-2:
     uv run python -m smolagents_impl.part2_validation
 
-# 07 — LangGraph, part 2 (validation + retries)
+# LangGraph, part 2 (validation + retries)
 langgraph-2:
     uv run python -m langgraph_impl.part2_validation
 
-# 08 — Force a retry live (temporary high threshold)
+# Force a retry live (temporary high threshold)
 force-retry:
-    uv run python demo/08_force_retry.py
+    uv run python demo/force_retry.py

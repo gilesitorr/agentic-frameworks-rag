@@ -1,7 +1,7 @@
-"""Demo 02 — The validation rule (no OpenAI).
+"""The validation rule (no OpenAI).
 
 Compares a valid summary with an invalid one to show what part 2 checks.
-    python demo/02_validation.py
+    python demo/validation_rule.py
 """
 
 import pathlib

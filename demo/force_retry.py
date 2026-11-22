@@ -1,8 +1,8 @@
-"""Demo 08 — Force a retry live.
+"""Force a retry live.
 
 Raises the minimum number of sections so the first attempt fails and you can see
 the fail → retry → fix cycle. The change is temporary (only this run).
-    python demo/08_force_retry.py
+    python demo/force_retry.py
 """
 
 import pathlib
