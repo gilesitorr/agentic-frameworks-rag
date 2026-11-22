@@ -6,7 +6,8 @@ from pydantic import BaseModel, Field
 class SummaryPoint(BaseModel):
     idea: str = Field(description="One idea from the paper.")
     section: str = Field(
-        description="The section that backs the idea, copied exactly from the [label] of a passage."
+        description="Name of the paper section that backs the idea: the text between square "
+        "brackets at the start of a passage, e.g. '3.1. Residual Learning'."
     )
 
 
