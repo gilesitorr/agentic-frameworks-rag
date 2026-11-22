@@ -18,6 +18,7 @@ dependencies = [
     # Utilities
     "pydantic>=2.7",
     "python-dotenv>=1.0",
+    "rust-just>=1.59.0",  # the just command runner, for the demo recipes
 ]
 
 [tool.uv]

@@ -1,6 +1,6 @@
 # Demo recipes for the talk. Run `just` to list them.
 # Everything runs through uv, so no venv activation is needed.
-# Install just: https://just.systems/  (e.g. `winget install Casey.Just`)
+# just is a project dependency: after `uv sync`, run recipes with `uv run just <recipe>`.
 
 # Run recipes in PowerShell on Windows, and force UTF-8 so smolagents'
 # rich output never trips the legacy cp1252 console.

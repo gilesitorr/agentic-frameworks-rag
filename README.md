@@ -27,7 +27,8 @@ diagrams are in [`docs/diagrams.md`](docs/diagrams.md).
 ## Usage
 
 We use [uv](https://docs.astral.sh/uv/) for the environment and
-[just](https://just.systems/) for the demo recipes.
+[just](https://just.systems/) for the demo recipes. `just` is a project dependency, so
+`uv sync` installs it into the environment: no separate install needed.
 
 ```powershell
 uv sync                   # creates the environment and installs everything (reads pyproject.toml)
@@ -35,18 +36,19 @@ cp .env.example .env      # add your OPENAI_API_KEY   (Windows: copy .env.exampl
 ```
 
 The paper (`data/resnet.pdf`) is in the repo. The embedding model is downloaded from
-HuggingFace into `.models/` on the first run (`just warmup` does it ahead of time); after
-that the RAG runs offline. Run any demo with a recipe (list them all with `just`):
+HuggingFace into `.models/` on the first run (`uv run just warmup` does it ahead of time); after
+that the RAG runs offline. Run any demo with a recipe (list them all with `uv run just`):
 
 ```powershell
-just rag-internals         # offline: PDF sections + semantic search
-just smolagents-2          # smolagents, part 2 (validation + retries)
-just langgraph-2           # LangGraph, part 2 (validation + retries)
-just pydantic-validation   # Pydantic AI, part 2 (validation + retries)
-just force-retry pydantic  # force a retry live (baseline, smolagents, langgraph or pydantic)
+uv run just rag-internals         # offline: PDF sections + semantic search
+uv run just smolagents-2          # smolagents, part 2 (validation + retries)
+uv run just langgraph-2           # LangGraph, part 2 (validation + retries)
+uv run just pydantic-validation   # Pydantic AI, part 2 (validation + retries)
+uv run just force-retry pydantic  # force a retry live (baseline, smolagents, langgraph or pydantic)
 ```
 
-Each recipe just wraps `uv run ...`, so you can always run the module directly instead,
+If you have `just` installed globally, you can drop the `uv run` prefix. Each recipe just
+wraps `uv run ...`, so you can always run the module directly instead,
 e.g. `uv run python -m smolagents_impl.part1_basic`.
 
 ## Stack
