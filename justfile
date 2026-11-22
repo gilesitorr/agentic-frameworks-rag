@@ -15,7 +15,7 @@ default:
 setup:
     uv sync
 
-# Sanity check: load the vendored embedding model (it lives in .models/)
+# Sanity check: build the index (downloads the embedding model into .models/ on first run)
 warmup:
     uv run python -c "from rag_core import build_rag; build_rag('data/resnet.pdf'); print('ready')"
 

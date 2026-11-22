@@ -6,8 +6,8 @@ import pathlib
 # Embeddings (fastembed, runs locally)
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
-# fastembed looks for the model here. It is vendored in the repo (.models/), so
-# the demo runs offline on any OS — no HuggingFace download needed.
+# fastembed downloads the model here on the first run (git-ignored); after that
+# the RAG runs offline.
 CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".models"
 
 # Document chunking (in characters)

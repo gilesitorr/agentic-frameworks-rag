@@ -11,7 +11,7 @@ RAG and same model (see [`rag_core/config.py`](rag_core/config.py)).
 |---|---|
 | smolagents | `smolagents_impl/` |
 | LangGraph | `langgraph_impl/` |
-| Pydantic AI | `pydantic_impl/` (José) |
+| Pydantic AI | `pydantic_impl/` |
 | No framework | `baseline/` |
 
 Each demo has two parts: **basic** (retrieve and summarize) and **validation +
@@ -29,15 +29,16 @@ uv sync                   # creates the environment and installs everything (rea
 cp .env.example .env      # add your OPENAI_API_KEY   (Windows: copy .env.example .env)
 ```
 
-The paper (`data/resnet.pdf`) and the embedding model (`.models/`) are vendored in the repo,
-so the demo runs offline on any OS — no HuggingFace download needed. Run any demo with a
-recipe (list them all with `just`):
+The paper (`data/resnet.pdf`) is in the repo. The embedding model is downloaded from
+HuggingFace into `.models/` on the first run (`just warmup` does it ahead of time); after
+that the RAG runs offline. Run any demo with a recipe (list them all with `just`):
 
 ```powershell
-just rag-internals     # offline: PDF sections + semantic search
-just smolagents-2      # smolagents, part 2 (validation + retries)
-just langgraph-2       # LangGraph, part 2 (validation + retries)
-just force-retry       # force a retry live
+just rag-internals         # offline: PDF sections + semantic search
+just smolagents-2          # smolagents, part 2 (validation + retries)
+just langgraph-2           # LangGraph, part 2 (validation + retries)
+just pydantic-validation   # Pydantic AI, part 2 (validation + retries)
+just force-retry pydantic  # force a retry live (baseline, smolagents, langgraph or pydantic)
 ```
 
 Each recipe just wraps `uv run ...`, so you can always run the module directly instead,
@@ -45,4 +46,12 @@ e.g. `uv run python -m smolagents_impl.part1_basic`.
 
 ## Stack
 
-fastembed (embeddings) · ChromaDB (vector store) · OpenAI `gpt-4o-mini` (generation)
+pymupdf4llm (PDF parsing) · fastembed (embeddings) · ChromaDB (vector store) ·
+OpenAI `gpt-4o-mini` (generation)
+
+## The shared RAG (`rag_core`)
+
+`build_rag()` converts the PDF to Markdown with pymupdf4llm, splits it at its headings,
+and packs each section's paragraphs into chunks of up to 1000 characters. Every chunk is
+labeled with its section (`[3.1. Residual Learning] ...`), so the model sees where each
+passage comes from and can cite it. References are not indexed.
