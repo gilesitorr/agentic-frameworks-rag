@@ -10,8 +10,9 @@ LangGraph are **workflows** (one fixed query, then one LLM call), while smolagen
 Pydantic AI are **agents** (the LLM decides what to search, through a tool).
 
 > The model and the RAG are identical, so the framework does not make the LLM write better.
-> What shows in the output is the pattern: the agents search several times and cover more
-> sections, while the workflows only see the 5 chunks of their single query.
+> What shows in the output is the pattern: the agents searched 3 to 5 times (15 to 25
+> chunks), while the workflows only see the 5 chunks of their single query. With a retry,
+> an agent can search again; a workflow gets the same 5 chunks back.
 
 ## The frameworks at a glance
 
