@@ -27,6 +27,10 @@ rag-internals:
 validation:
     uv run python demo/validation_rule.py
 
+# Baseline: the same flow with no framework
+baseline:
+    uv run python -m baseline.summarize_plain
+
 # smolagents, part 1 (basic)
 smolagents-1:
     uv run python -m smolagents_impl.part1_basic
@@ -35,9 +39,9 @@ smolagents-1:
 langgraph-1:
     uv run python -m langgraph_impl.part1_basic
 
-# Baseline: the same flow with no framework
-baseline:
-    uv run python -m baseline.summarize_plain
+# Pydantic AI, part 1 (basic)
+pydantic-basic:
+    uv run python -m pydantic_impl.part1_basic
 
 # smolagents, part 2 (validation + retries)
 smolagents-2:
@@ -47,6 +51,10 @@ smolagents-2:
 langgraph-2:
     uv run python -m langgraph_impl.part2_validation
 
-# Force a retry live (temporary high threshold)
-force-retry:
-    uv run python demo/force_retry.py
+# Pydantic AI, part 2 (validation + retries)
+pydantic-validation:
+    uv run python -m pydantic_impl.part2_validation
+
+# Force a retry live (temporary high threshold): baseline, smolagents, langgraph or pydantic
+force-retry framework="baseline":
+    uv run python demo/force_retry.py {{framework}}
