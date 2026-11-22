@@ -17,6 +17,8 @@ from . import config
 # pymupdf4llm writes PDF headings as Markdown, e.g. "## **3.1. Residual Learning**".
 _HEADING = re.compile(r"^#{1,3} \**([A-Z0-9].*?)\**\s*$")
 _SKIP = {"References", "Acknowledgments", "Acknowledgements"}  # not worth indexing
+# Text pymupdf4llm extracts from inside figures (axis labels, tick values): noise for retrieval.
+_PICTURE_TEXT = re.compile(r"<!-- Start of picture text -->.*?<!-- End of picture text -->", re.S)
 
 
 def _split(pdf_path: str) -> tuple[list[str], list[str]]:
@@ -25,7 +27,7 @@ def _split(pdf_path: str) -> tuple[list[str], list[str]]:
     Paragraphs are packed into chunks of up to CHUNK_SIZE characters, and a new
     chunk starts at every heading, so each chunk belongs to exactly one section.
     """
-    markdown = pymupdf4llm.to_markdown(pdf_path, use_ocr=False)
+    markdown = _PICTURE_TEXT.sub("", pymupdf4llm.to_markdown(pdf_path, use_ocr=False))
     sections, chunks, section, buffer = [], [], "Front matter", ""
 
     def flush() -> None:
