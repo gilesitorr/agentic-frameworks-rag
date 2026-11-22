@@ -26,6 +26,8 @@ def _split(pdf_path: str) -> tuple[list[str], list[str]]:
 
     Paragraphs are packed into chunks of up to CHUNK_SIZE characters, and a new
     chunk starts at every heading, so each chunk belongs to exactly one section.
+    Only sections with at least one chunk are returned, so every valid citation
+    points to text the RAG can retrieve.
     """
     markdown = _PICTURE_TEXT.sub("", pymupdf4llm.to_markdown(pdf_path, use_ocr=False))
     sections, chunks, section, buffer = [], [], "Front matter", ""
@@ -33,13 +35,13 @@ def _split(pdf_path: str) -> tuple[list[str], list[str]]:
     def flush() -> None:
         if buffer.strip() and section not in _SKIP:
             chunks.append(f"[{section}] {buffer.strip()}")
+            if section not in sections:
+                sections.append(section)
 
     for paragraph in markdown.split("\n\n"):
         if heading := _HEADING.match(paragraph.strip()):
             flush()
             section, buffer = heading[1], ""
-            if section not in _SKIP:
-                sections.append(section)
         elif len(buffer) + len(paragraph) > config.CHUNK_SIZE:
             flush()
             buffer = paragraph
