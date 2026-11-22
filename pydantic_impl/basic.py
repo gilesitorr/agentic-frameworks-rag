@@ -1,11 +1,11 @@
-"""Pydantic AI — Part 1: basic summary.
+"""Pydantic AI — basic: summarize the paper with a search tool.
 
 The agent has one tool (search the document) and returns a typed DocumentSummary.
 Pydantic AI runs the reason ↔ use tool ↔ answer loop, builds the tool schema from
 the type hints and docstring, and validates the answer against the Pydantic model
 (asking the model to fix it if it doesn't match).
 
-Run:  python -m pydantic_impl.part1_basic
+Run:  python -m pydantic_impl.basic
 """
 
 from dotenv import load_dotenv

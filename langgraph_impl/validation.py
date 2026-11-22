@@ -1,9 +1,9 @@
-"""LangGraph — Part 2: structured summary + validation + retries.
+"""LangGraph — validation: structured summary + validation + retries.
 
 The retry is an explicit cycle in the graph: generate → validate → if it is
 not valid, go back to generate with the feedback.
 
-Run:  python -m langgraph_impl.part2_validation
+Run:  python -m langgraph_impl.validation
 """
 
 import os

@@ -1,9 +1,9 @@
-"""LangGraph — Part 1: basic summary as an explicit graph.
+"""LangGraph — basic: summarize the paper as an explicit graph.
 
 We define the flow as nodes + edges: retrieve → generate. The control is
 explicit, unlike smolagents, which hides the loop inside the agent.
 
-Run:  python -m langgraph_impl.part1_basic
+Run:  python -m langgraph_impl.basic
 """
 
 import os

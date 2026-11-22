@@ -1,4 +1,4 @@
-"""Schema for the structured summary (part 2)."""
+"""Schema for the structured summary (validation demos)."""
 
 from pydantic import BaseModel, Field
 

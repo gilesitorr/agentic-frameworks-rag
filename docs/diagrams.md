@@ -25,7 +25,7 @@ flowchart LR
     end
 ```
 
-**Part 2** adds a check: the answer must be valid; if not, generate again.
+**Validation** adds a check: the answer must be valid; if not, generate again.
 
 ```mermaid
 flowchart LR
@@ -44,7 +44,7 @@ framework is only **how the query/validation/retry flow is wired**.
 
 The RAG lives in a tool; the agent decides when to call it.
 
-### Part 1 — basic
+### Basic
 
 ```mermaid
 flowchart TD
@@ -57,7 +57,7 @@ flowchart TD
     AGENT -- final answer --> OUT[Summary]
 ```
 
-### Part 2 — validation + retry (our loop around `agent.run`)
+### Validation + retry (our loop around `agent.run`)
 
 ```mermaid
 flowchart TD
@@ -78,7 +78,7 @@ flowchart TD
 
 The flow is an explicit state graph; the retry is a cycle in the graph.
 
-### Part 1 — basic
+### Basic
 
 ```mermaid
 flowchart LR
@@ -89,7 +89,7 @@ flowchart LR
     GEN -. "client.chat.completions" .-> OAI[OpenAI]
 ```
 
-### Part 2 — validation + retry (conditional edge)
+### Validation + retry (conditional edge)
 
 ```mermaid
 flowchart TD
@@ -108,7 +108,7 @@ State carries `context`, `summary`, `problems`, `attempts`. `route` returns `"re
 
 ## 4. No framework (baseline)
 
-The same part 2, written by hand: a `for` loop with the retry inline.
+The same validation flow, written by hand: a `for` loop with the retry inline.
 
 ```mermaid
 flowchart TD
@@ -128,7 +128,7 @@ flowchart TD
 The RAG lives in a tool, like smolagents, but the output is typed and the retry is
 **declarative**: an output validator raises `ModelRetry` and the framework re-asks the model.
 
-### Part 1 — basic
+### Basic
 
 ```mermaid
 flowchart TD
@@ -141,7 +141,7 @@ flowchart TD
     AGENT -- "final answer, validated against the schema" --> OUT["result.output: DocumentSummary"]
 ```
 
-### Part 2 — validation + retry (handled by the framework)
+### Validation + retry (handled by the framework)
 
 ```mermaid
 flowchart TD

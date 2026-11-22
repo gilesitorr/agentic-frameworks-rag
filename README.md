@@ -41,15 +41,15 @@ that the RAG runs offline. Run any demo with a recipe (list them all with `uv ru
 
 ```powershell
 uv run just rag-internals         # offline: PDF sections + semantic search
-uv run just smolagents-2          # smolagents, part 2 (validation + retries)
-uv run just langgraph-2           # LangGraph, part 2 (validation + retries)
-uv run just pydantic-validation   # Pydantic AI, part 2 (validation + retries)
+uv run just smolagents-validation # smolagents, validation (structured output + retries)
+uv run just langgraph-validation  # LangGraph, validation (structured output + retries)
+uv run just pydantic-validation   # Pydantic AI, validation (structured output + retries)
 uv run just force-retry pydantic  # force a retry live (baseline, smolagents, langgraph or pydantic)
 ```
 
 If you have `just` installed globally, you can drop the `uv run` prefix. Each recipe just
 wraps `uv run ...`, so you can always run the module directly instead,
-e.g. `uv run python -m smolagents_impl.part1_basic`.
+e.g. `uv run python -m smolagents_impl.basic`.
 
 ## Stack
 

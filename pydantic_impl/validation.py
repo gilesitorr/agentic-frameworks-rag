@@ -1,11 +1,11 @@
-"""Pydantic AI — Part 2: structured summary + validation + retries.
+"""Pydantic AI — validation: structured summary + validation + retries.
 
-Same agent as part 1, plus two decorators: the valid sections go into the
+Same agent as the basic version, plus two decorators: the valid sections go into the
 instructions, and an output validator runs the shared rule. When it fails we raise
 ModelRetry: Pydantic AI sends the problems back to the model and asks again, up to
 `retries` times. There is no loop of ours (compare it with smolagents and LangGraph).
 
-Run:  python -m pydantic_impl.part2_validation
+Run:  python -m pydantic_impl.validation
 """
 
 from dotenv import load_dotenv

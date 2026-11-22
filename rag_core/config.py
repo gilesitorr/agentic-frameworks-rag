@@ -19,6 +19,6 @@ TOP_K = 5
 # Generation (OpenAI)
 OPENAI_MODEL = "gpt-4o-mini"
 
-# Validation and retries (part 2)
+# Validation and retries (validation demos)
 MIN_SECTIONS_CITED = 3
 MAX_ATTEMPTS = 3

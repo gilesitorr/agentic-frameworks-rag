@@ -1,9 +1,9 @@
-"""smolagents — Part 1: basic summary.
+"""smolagents — basic: summarize the paper with a search tool.
 
 The agent has one tool (search the document) and one task (summarize).
 smolagents handles the reason ↔ use tool ↔ answer loop.
 
-Run:  python -m smolagents_impl.part1_basic
+Run:  python -m smolagents_impl.basic
 """
 
 import os

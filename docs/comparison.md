@@ -23,7 +23,7 @@ Pydantic AI are **agents** (the LLM decides what to search, through a tool).
 | **Pydantic AI** | Agent with tools, typed output, validators and declarative retries. | Validated output and retries "out of the box"; dependency injection. | Less explicit flow control than a graph. |
 | **No framework** | Everything by hand. | Zero dependencies, full control. | You write and maintain everything. |
 
-## Part 2 is where the difference shows
+## Validation is where the difference shows
 
 Adding *validate that the summary cites real sections + retry* is solved differently:
 
@@ -32,7 +32,7 @@ Adding *validate that the summary cites real sections + retry* is solved differe
 - **LangGraph:** a cycle in the graph (`validate` node + conditional edge).
 - **Pydantic AI:** an `@agent.output_validator` that raises `ModelRetry`; the framework runs the retry.
 
-## The honest number: lines of code (part 2, with docstrings)
+## The honest number: lines of code (validation version, with docstrings)
 
 | baseline | smolagents | LangGraph | Pydantic AI |
 |---|---|---|---|
@@ -60,5 +60,5 @@ decisions, cycles and state → the framework pays for itself.
   Validate + retry is cheap and covers exactly when the model fails.
 - smolagents returns the output as an already-parsed dict (not JSON) and retries on API
   errors with a long backoff (~11 min): two things to watch in a live demo.
-- baseline and LangGraph part 2 parse the JSON outside the retry loop: a schema mismatch
+- the baseline and LangGraph validation versions parse the JSON outside the retry loop: a schema mismatch
   stops the run. smolagents catches it by hand; Pydantic AI retries it automatically.

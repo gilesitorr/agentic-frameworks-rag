@@ -1,6 +1,6 @@
 """The validation rule (no OpenAI).
 
-Compares a valid summary with an invalid one to show what part 2 checks.
+Compares a valid summary with an invalid one to show what the validation demos check.
     python demo/validation_rule.py
 """
 
