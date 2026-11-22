@@ -11,8 +11,7 @@ EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".models"
 
 # Document chunking (in characters)
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 1000  # max per chunk; chunks never cross a section boundary
 
 # Chunks retrieved per query
 TOP_K = 5

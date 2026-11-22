@@ -14,9 +14,9 @@ from rag_core import DocumentSummary, SummaryPoint, build_rag, validate_summary
 rag = build_rag("data/resnet.pdf")
 
 good = DocumentSummary(points=[
-    SummaryPoint(idea="Residual learning.", section="3 Deep Residual Learning"),
-    SummaryPoint(idea="Identity shortcuts.", section="3.2 Identity Mapping by Shortcuts"),
-    SummaryPoint(idea="ImageNet results.", section="4.1 ImageNet Classification"),
+    SummaryPoint(idea="Residual learning.", section="3. Deep Residual Learning"),
+    SummaryPoint(idea="Identity shortcuts.", section="3.2. Identity Mapping by Shortcuts"),
+    SummaryPoint(idea="ImageNet results.", section="4.1. ImageNet Classification"),
 ])
 bad = DocumentSummary(points=[
     SummaryPoint(idea="Something the model made up.", section="Fake Section"),

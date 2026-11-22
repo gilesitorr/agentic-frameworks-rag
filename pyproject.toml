@@ -2,12 +2,11 @@
 name = "agentic-frameworks-rag"
 version = "0.1.0"
 description = "Mismo RAG, tres frameworks de agentes (smolagents, Pydantic AI, LangGraph)."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 dependencies = [
     # Núcleo RAG (compartido)
-    "pypdf>=5.0",
-    "fonttools>=4.50",   # mejor parseo de fuentes del PDF (evita warnings de pypdf)
+    "pymupdf4llm>=2.1",  # PDF -> Markdown, with headings as # lines
     "fastembed>=0.4",
     "chromadb>=0.5",
     # Modelo de generación (OpenAI, el mismo para las tres implementaciones)

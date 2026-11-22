@@ -5,39 +5,46 @@ between frameworks is the framework itself.
 """
 
 import re
-import unicodedata
 import uuid
 from dataclasses import dataclass
 
 import chromadb
+import pymupdf4llm
 from fastembed import TextEmbedding
-from pypdf import PdfReader
 
 from . import config
 
-# A heading like "3" or "3.1" followed by a short title in title case.
-_SECTION = re.compile(r"^\s*(\d+(?:\.\d+)*)\.?\s+([A-Z][A-Za-z][^\n]{1,60})\s*$")
+# pymupdf4llm writes PDF headings as Markdown, e.g. "## **3.1. Residual Learning**".
+_HEADING = re.compile(r"^#{1,3} \**([A-Z0-9].*?)\**\s*$")
+_SKIP = {"References", "Acknowledgments", "Acknowledgements"}  # not worth indexing
 
 
-def _read_pdf(path: str) -> str:
-    text = "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
-    return unicodedata.normalize("NFKC", text)  # normalize ligatures: "ﬁ" -> "fi"
+def _split(pdf_path: str) -> tuple[list[str], list[str]]:
+    """Split the PDF into section-labeled chunks: "[3.1. Residual Learning] ...".
 
+    Paragraphs are packed into chunks of up to CHUNK_SIZE characters, and a new
+    chunk starts at every heading, so each chunk belongs to exactly one section.
+    """
+    markdown = pymupdf4llm.to_markdown(pdf_path, use_ocr=False)
+    sections, chunks, section, buffer = [], [], "Front matter", ""
 
-def _sections(text: str) -> list[str]:
-    titles = []
-    for line in text.splitlines():
-        m = _SECTION.match(line)
-        # A real heading is short and has no commas or colons (skips figure captions).
-        if m and ":" not in m.group(2) and "," not in m.group(2):
-            titles.append(f"{m.group(1)} {m.group(2).strip()}")
-    return list(dict.fromkeys(titles))  # de-duplicated, in order
+    def flush() -> None:
+        if buffer.strip() and section not in _SKIP:
+            chunks.append(f"[{section}] {buffer.strip()}")
 
-
-def _chunks(text: str) -> list[str]:
-    step = config.CHUNK_SIZE - config.CHUNK_OVERLAP
-    pieces = (text[i:i + config.CHUNK_SIZE].strip() for i in range(0, len(text), step))
-    return [p for p in pieces if p]
+    for paragraph in markdown.split("\n\n"):
+        if heading := _HEADING.match(paragraph.strip()):
+            flush()
+            section, buffer = heading[1], ""
+            if section not in _SKIP:
+                sections.append(section)
+        elif len(buffer) + len(paragraph) > config.CHUNK_SIZE:
+            flush()
+            buffer = paragraph
+        else:
+            buffer += "\n\n" + paragraph
+    flush()
+    return chunks, sections
 
 
 @dataclass
@@ -49,15 +56,14 @@ class Rag:
     sections: list[str]
 
     def retrieve(self, query: str, k: int = config.TOP_K) -> list[str]:
-        """The k most relevant chunks for the query."""
-        vector = next(self.embedder.embed([query])).tolist()
+        """The k most relevant chunks for the query, each prefixed with its section."""
+        vector = next(self.embedder.query_embed(query)).tolist()
         return self.collection.query(query_embeddings=[vector], n_results=k)["documents"][0]
 
 
 def build_rag(pdf_path: str) -> Rag:
     """Load the PDF and leave the semantic index ready to query."""
-    text = _read_pdf(pdf_path)
-    chunks = _chunks(text)
+    chunks, sections = _split(pdf_path)
 
     embedder = TextEmbedding(model_name=config.EMBEDDING_MODEL, cache_dir=str(config.CACHE_DIR))
     vectors = [vec.tolist() for vec in embedder.embed(chunks)]
@@ -66,4 +72,4 @@ def build_rag(pdf_path: str) -> Rag:
     collection = chromadb.Client().create_collection(f"doc-{uuid.uuid4().hex[:8]}")
     collection.add(ids=[str(i) for i in range(len(chunks))], documents=chunks, embeddings=vectors)
 
-    return Rag(collection, embedder, _sections(text))
+    return Rag(collection, embedder, sections)
