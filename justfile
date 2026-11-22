@@ -15,9 +15,15 @@ default:
 setup:
     uv sync
 
-# Sanity check: build the index (downloads the embedding model into .models/ on first run)
-warmup:
-    uv run python -c "from rag_core import build_rag; build_rag('data/resnet.pdf'); print('ready')"
+# Ingest the PDF: build and save the index if it's missing or outdated, otherwise just load it
+ingest:
+    uv run python -c "from rag_core import build_rag; r = build_rag('data/resnet.pdf'); print(f'index ready: {r.collection.count()} chunks, {len(r.sections)} sections')"
+
+alias warmup := ingest
+
+# Rebuild the saved index from scratch (it also rebuilds by itself when the PDF or chunking changes)
+reindex:
+    uv run python -c "from rag_core import build_rag; build_rag('data/resnet.pdf', rebuild=True); print('rebuilt')"
 
 # RAG internals: sections + semantic search (offline, no OpenAI)
 rag-internals:

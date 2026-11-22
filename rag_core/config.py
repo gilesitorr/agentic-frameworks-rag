@@ -10,6 +10,10 @@ EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 # the RAG runs offline.
 CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".models"
 
+# The vector index is saved here (git-ignored) so later runs skip parsing and embedding.
+# It is rebuilt automatically when the PDF, the chunking code or these settings change.
+INDEX_DIR = pathlib.Path(__file__).resolve().parent.parent / ".chroma"
+
 # Document chunking (in characters)
 CHUNK_SIZE = 1000  # max per chunk; chunks never cross a section boundary
 

@@ -35,9 +35,11 @@ uv sync                   # creates the environment and installs everything (rea
 cp .env.example .env      # add your OPENAI_API_KEY   (Windows: copy .env.example .env)
 ```
 
-The paper (`data/resnet.pdf`) is in the repo. The embedding model is downloaded from
-HuggingFace into `.models/` on the first run (`uv run just warmup` does it ahead of time); after
-that the RAG runs offline. Run any demo with a recipe (list them all with `uv run just`):
+The paper (`data/resnet.pdf`) is in the repo. The first run downloads the embedding model
+into `.models/` and saves the vector index into `.chroma/` (about 30 s); later runs load the
+index from disk and start in a couple of seconds. `uv run just ingest` does this ahead of time.
+The index rebuilds by itself when the PDF or the chunking code changes; `uv run just reindex`
+forces a rebuild. After that the RAG runs offline. Run any demo with a recipe (list them all with `uv run just`):
 
 ```powershell
 uv run just rag-internals         # offline: PDF sections + semantic search

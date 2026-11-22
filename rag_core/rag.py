@@ -4,8 +4,10 @@ It is identical for every implementation: what differs is how each one orchestra
 retrieval and generation on top of it.
 """
 
+import hashlib
+import json
+import pathlib
 import re
-import uuid
 from dataclasses import dataclass
 
 import chromadb
@@ -53,7 +55,7 @@ def _split(pdf_path: str) -> tuple[list[str], list[str]]:
 
 @dataclass
 class Rag:
-    """In-memory semantic index + the document's sections."""
+    """Semantic index (saved in .chroma/) + the document's sections."""
 
     collection: object
     embedder: TextEmbedding
@@ -65,15 +67,34 @@ class Rag:
         return self.collection.query(query_embeddings=[vector], n_results=k)["documents"][0]
 
 
-def build_rag(pdf_path: str) -> Rag:
-    """Load the PDF and leave the semantic index ready to query."""
-    chunks, sections = _split(pdf_path)
+def _fingerprint(pdf_path: str) -> str:
+    """Changes whenever the PDF, this chunking code or the index settings change."""
+    digest = hashlib.sha256()
+    digest.update(pathlib.Path(pdf_path).read_bytes())
+    digest.update(pathlib.Path(__file__).read_bytes())
+    digest.update(f"{config.EMBEDDING_MODEL}|{config.CHUNK_SIZE}".encode())
+    return digest.hexdigest()[:16]
 
+
+def build_rag(pdf_path: str, rebuild: bool = False) -> Rag:
+    """Leave the semantic index ready to query.
+
+    The first run parses, chunks and embeds the PDF and saves the index in .chroma/.
+    Later runs load it from disk, unless the fingerprint changed or rebuild=True.
+    """
     embedder = TextEmbedding(model_name=config.EMBEDDING_MODEL, cache_dir=str(config.CACHE_DIR))
+    client = chromadb.PersistentClient(path=str(config.INDEX_DIR))
+    name = f"doc-{_fingerprint(pdf_path)}"
+
+    saved = {c.name for c in client.list_collections()}
+    if name in saved and not rebuild:
+        collection = client.get_collection(name)
+        return Rag(collection, embedder, json.loads(collection.metadata["sections"]))
+
+    for old in saved:  # outdated indexes (or this one, on rebuild)
+        client.delete_collection(old)
+    chunks, sections = _split(pdf_path)
     vectors = [vec.tolist() for vec in embedder.embed(chunks)]
-
-    # Unique name: rebuilding the index in the same process won't clash with another collection.
-    collection = chromadb.Client().create_collection(f"doc-{uuid.uuid4().hex[:8]}")
+    collection = client.create_collection(name, metadata={"sections": json.dumps(sections)})
     collection.add(ids=[str(i) for i in range(len(chunks))], documents=chunks, embeddings=vectors)
-
     return Rag(collection, embedder, sections)
