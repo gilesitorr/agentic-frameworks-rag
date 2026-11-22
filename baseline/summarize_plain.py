@@ -41,6 +41,8 @@ def main() -> None:
             response_format={"type": "json_object"},
             messages=[{"role": "user", "content": prompt(context, problems)}],
         )
+        # Note: we observed that a reply that doesn't match the schema raises here, outside
+        # the retry loop (which handles validate_summary problems), so the run ends.
         summary = DocumentSummary.model_validate_json(response.choices[0].message.content)
         problems = validate_summary(summary, rag.sections)
         print(f"Attempt {attempt}: {'valid' if not problems else problems}")
