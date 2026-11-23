@@ -56,7 +56,8 @@ decisions, cycles and state → the framework pays for itself.
 ## Details we lived while building
 
 - The RAG is identical in the three; the differentiator is the orchestration.
-- `gpt-4o-mini` is very obedient: to see a retry we had to raise the section threshold.
+- `gpt-4o-mini` is very obedient: it usually passes on the first attempt, so the
+  force-retry demo forces the first attempt to fail to show the retry loop.
   Validate + retry is cheap and covers exactly when the model fails.
 - smolagents returns the output as an already-parsed dict (not JSON) and retries on API
   errors with a long backoff (~11 min): two things to watch in a live demo.

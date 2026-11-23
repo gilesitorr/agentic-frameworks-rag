@@ -108,7 +108,17 @@ State carries `context`, `summary`, `problems`, `attempts`. `route` returns `"re
 
 ## 4. No framework (baseline)
 
-The same validation flow, written by hand: a `for` loop with the retry inline.
+No library between you and the model: the OpenAI SDK plus a hand-written loop.
+
+### Basic
+
+```mermaid
+flowchart LR
+    CTX["context = rag.retrieve(...)"] --> GEN["client.chat.completions.create"]
+    GEN --> OUT["print the summary"]
+```
+
+### Validation + retry (a hand-written for loop)
 
 ```mermaid
 flowchart TD
