@@ -33,9 +33,9 @@ rag-internals:
 validation:
     uv run python demo/validation_rule.py
 
-# Baseline: the same flow with no framework
-baseline:
-    uv run python -m baseline.summarize_plain
+# No framework, basic
+baseline-basic:
+    uv run python -m baseline.summarize_basic
 
 # smolagents, basic
 smolagents-basic:
@@ -48,6 +48,10 @@ langgraph-basic:
 # Pydantic AI, basic
 pydantic-basic:
     uv run python -m pydantic_impl.part1_basic
+
+# No framework, validation (structured output + retries)
+baseline-validation:
+    uv run python -m baseline.summarize_plain
 
 # smolagents, validation (structured output + retries)
 smolagents-validation:
