@@ -1,18 +1,21 @@
-"""Shared parameters. Every implementation uses these values, so that the only
-difference between frameworks is the framework itself."""
+"""Shared parameters. Every implementation uses these values, so the PDF, the RAG
+and the model are the same everywhere."""
 
 import pathlib
 
 # Embeddings (fastembed, runs locally)
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
-# fastembed looks for the model here. It is vendored in the repo (.models/), so
-# the demo runs offline on any OS — no HuggingFace download needed.
+# fastembed downloads the model here on the first run (git-ignored); after that
+# the RAG runs offline.
 CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".models"
 
+# The vector index is saved here (git-ignored) so later runs skip parsing and embedding.
+# It is rebuilt automatically when the PDF, the chunking code or these settings change.
+INDEX_DIR = pathlib.Path(__file__).resolve().parent.parent / ".chroma"
+
 # Document chunking (in characters)
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 1000  # max per chunk; chunks never cross a section boundary
 
 # Chunks retrieved per query
 TOP_K = 5
@@ -20,6 +23,6 @@ TOP_K = 5
 # Generation (OpenAI)
 OPENAI_MODEL = "gpt-4o-mini"
 
-# Validation and retries (part 2)
+# Validation and retries (validation demos)
 MIN_SECTIONS_CITED = 3
 MAX_ATTEMPTS = 3

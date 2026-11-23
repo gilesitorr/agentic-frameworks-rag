@@ -2,6 +2,8 @@
 
 We do by hand what smolagents / Pydantic AI / LangGraph organize for you:
 retrieve, generate structured output, validate and retry in a loop.
+Only the OpenAI SDK talks to the model; pydantic (the validation library, not
+Pydantic AI) just parses the shared schema. No agent framework is involved.
 
 Run:  python -m baseline.summarize_plain
 """
@@ -41,6 +43,8 @@ def main() -> None:
             response_format={"type": "json_object"},
             messages=[{"role": "user", "content": prompt(context, problems)}],
         )
+        # Note: we observed that a reply that doesn't match the schema raises here, outside
+        # the retry loop (which handles validate_summary problems), so the run ends.
         summary = DocumentSummary.model_validate_json(response.choices[0].message.content)
         problems = validate_summary(summary, rag.sections)
         print(f"Attempt {attempt}: {'valid' if not problems else problems}")

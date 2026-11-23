@@ -5,10 +5,14 @@ All of this comes from building and running the same system in the three framewo
 ## The controlled experiment
 
 Same problem (summarize ResNet), same stack (fastembed + ChromaDB + `gpt-4o-mini`),
-same PDF. The only thing that changes is the framework.
+same PDF. Besides the framework, the implementations differ in pattern: the baseline and
+LangGraph are **workflows** (one fixed query, then one LLM call), while smolagents and
+Pydantic AI are **agents** (the LLM decides what to search, through a tool).
 
-> Since the model and the RAG are identical, **all three summarize equally well**. The
-> framework does not improve the output; it changes **how you build and control it**.
+> The model and the RAG are identical, so the framework does not make the LLM write better.
+> What shows in the output is the pattern: the agents searched 3 to 5 times (15 to 25
+> chunks), while the workflows only see the 5 chunks of their single query. With a retry,
+> an agent can search again; a workflow gets the same 5 chunks back.
 
 ## The frameworks at a glance
 
@@ -16,25 +20,25 @@ same PDF. The only thing that changes is the framework.
 |---|---|---|---|
 | **smolagents** | Lightweight agent with tools; the agent decides when to use them. | Fast prototyping, little code. | No validation or retries built in: you add them. |
 | **LangGraph** | Flow as an explicit state graph, with cycles. | Flow control, retry as a natural cycle, state. | More ceremony for simple cases. |
-| **Pydantic AI** | Typed outputs with validators and declarative retries. | Validation and retries "out of the box". | (José covers this) |
+| **Pydantic AI** | Agent with tools, typed output, validators and declarative retries. | Validated output and retries "out of the box"; dependency injection. | Less explicit flow control than a graph. |
 | **No framework** | Everything by hand. | Zero dependencies, full control. | You write and maintain everything. |
 
-## Part 2 is where the difference shows
+## Validation is where the difference shows
 
 Adding *validate that the summary cites real sections + retry* is solved differently:
 
 - **baseline:** a hand-written `for`.
 - **smolagents:** a loop of ours around `agent.run()`.
 - **LangGraph:** a cycle in the graph (`validate` node + conditional edge).
-- **Pydantic AI:** the framework's validators + retry.
+- **Pydantic AI:** an `@agent.output_validator` that raises `ModelRetry`; the framework runs the retry.
 
-## The honest number: lines of code (part 2, with docstrings)
+## The honest number: lines of code (validation version, with docstrings)
 
-| baseline | smolagents | LangGraph |
-|---|---|---|
-| 55 | 79 | 79 |
+| baseline | smolagents | LangGraph | Pydantic AI |
+|---|---|---|---|
+| 59 | 79 | 81 | 69 |
 
-For a simple case, **the framework costs lines, it does not save them** (by hand it is 55).
+For a simple case, **the framework costs lines, it does not save them** (by hand it is 59).
 The payoff appears when the flow grows: more branches, state, tools, retries at several
 points. (smolagents adds lines because you have to normalize its output, which is not
 structured by default.)
@@ -56,3 +60,5 @@ decisions, cycles and state → the framework pays for itself.
   Validate + retry is cheap and covers exactly when the model fails.
 - smolagents returns the output as an already-parsed dict (not JSON) and retries on API
   errors with a long backoff (~11 min): two things to watch in a live demo.
+- the baseline and LangGraph validation versions parse the JSON outside the retry loop: a schema mismatch
+  stops the run. smolagents catches it by hand; Pydantic AI retries it automatically.

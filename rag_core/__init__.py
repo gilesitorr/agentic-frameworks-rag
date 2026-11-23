@@ -1,4 +1,4 @@
-"""rag_core: shared RAG engine + part 2 schema and validation."""
+"""rag_core: shared RAG engine + the schema and rule for the validation demos."""
 
 from . import config
 from .rag import Rag, build_rag

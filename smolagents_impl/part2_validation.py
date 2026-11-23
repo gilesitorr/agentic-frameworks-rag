@@ -1,4 +1,4 @@
-"""smolagents — Part 2: structured summary + validation + retries.
+"""smolagents — validation: structured summary + validation + retries.
 
 smolagents gives us the tool loop, but we orchestrate validation and retries
 ourselves: a loop around agent.run (compare it with LangGraph, where the retry

@@ -1,7 +1,7 @@
-"""Demo 01 — The RAG internals (no OpenAI, instant).
+"""The RAG internals (no OpenAI, instant).
 
 Shows the sections detected in the PDF and a semantic search.
-    python demo/01_rag_internals.py
+    python demo/rag_internals.py
 """
 
 import pathlib

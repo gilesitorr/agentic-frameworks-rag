@@ -1,4 +1,4 @@
-"""LangGraph — Part 2: structured summary + validation + retries.
+"""LangGraph — validation: structured summary + validation + retries.
 
 The retry is an explicit cycle in the graph: generate → validate → if it is
 not valid, go back to generate with the feedback.
@@ -48,6 +48,8 @@ def generate(state: State) -> dict:
         response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
     )
+    # Note: we observed that a reply that doesn't match the schema raises here, outside
+    # the retry loop (which handles validate_summary problems), so the run ends.
     summary = DocumentSummary.model_validate_json(response.choices[0].message.content)
     return {"summary": summary, "attempts": state["attempts"] + 1}
 

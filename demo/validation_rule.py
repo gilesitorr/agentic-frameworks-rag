@@ -1,7 +1,7 @@
-"""Demo 02 — The validation rule (no OpenAI).
+"""The validation rule (no OpenAI).
 
-Compares a valid summary with an invalid one to show what part 2 checks.
-    python demo/02_validation.py
+Compares a valid summary with an invalid one to show what the validation demos check.
+    python demo/validation_rule.py
 """
 
 import pathlib
@@ -14,9 +14,9 @@ from rag_core import DocumentSummary, SummaryPoint, build_rag, validate_summary
 rag = build_rag("data/resnet.pdf")
 
 good = DocumentSummary(points=[
-    SummaryPoint(idea="Residual learning.", section="3 Deep Residual Learning"),
-    SummaryPoint(idea="Identity shortcuts.", section="3.2 Identity Mapping by Shortcuts"),
-    SummaryPoint(idea="ImageNet results.", section="4.1 ImageNet Classification"),
+    SummaryPoint(idea="Residual learning.", section="3.1. Residual Learning"),
+    SummaryPoint(idea="Identity shortcuts.", section="3.2. Identity Mapping by Shortcuts"),
+    SummaryPoint(idea="ImageNet results.", section="4.1. ImageNet Classification"),
 ])
 bad = DocumentSummary(points=[
     SummaryPoint(idea="Something the model made up.", section="Fake Section"),

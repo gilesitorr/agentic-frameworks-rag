@@ -1,24 +1,25 @@
-# Entorno de Python
+# Python environment
 .venv/
 venv/
 __pycache__/
 *.pyc
 
-# Secretos
+# Secrets
 .env
 
-# Datos: ignora PDFs, salvo el paper de la demo (resnet) que sí se versiona.
+# Data: ignore PDFs, except the demo paper (resnet), which is versioned.
 data/*.pdf
 !data/resnet.pdf
 
-# Persistencia de ChromaDB (si se usa cliente persistente)
+# ChromaDB persistence (if a persistent client is used)
 .chroma/
 chroma/
 
-# Caché del modelo de embeddings (fastembed lo descarga/guarda aquí)
+# Embedding model cache (fastembed downloads it here)
 .models/
 
-# Material local de la charla (no se versiona)
-# Los scripts (demo/*.py) sí se versionan; el README de la carpeta y el guion no.
+# Local talk material (not versioned)
+# The demo/*.py scripts are versioned; the folder README, the script and the slides are not.
 demo/README.md
 docs/guion-maestro.md
+slides/

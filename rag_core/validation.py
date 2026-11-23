@@ -1,4 +1,4 @@
-"""Summary validation (part 2): every point must cite a real section of the
+"""Summary validation (validation demos): every point must cite a real section of the
 document, and at least MIN_SECTIONS_CITED distinct sections must be covered."""
 
 from . import config

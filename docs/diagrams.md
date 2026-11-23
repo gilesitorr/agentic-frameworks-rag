@@ -25,7 +25,7 @@ flowchart LR
     end
 ```
 
-**Part 2** adds a check: the answer must be valid; if not, generate again.
+**Validation** adds a check: the answer must be valid; if not, generate again.
 
 ```mermaid
 flowchart LR
@@ -44,7 +44,7 @@ framework is only **how the query/validation/retry flow is wired**.
 
 The RAG lives in a tool; the agent decides when to call it.
 
-### Part 1 — basic
+### Basic
 
 ```mermaid
 flowchart TD
@@ -57,7 +57,7 @@ flowchart TD
     AGENT -- final answer --> OUT[Summary]
 ```
 
-### Part 2 — validation + retry (our loop around `agent.run`)
+### Validation + retry (our loop around `agent.run`)
 
 ```mermaid
 flowchart TD
@@ -78,7 +78,7 @@ flowchart TD
 
 The flow is an explicit state graph; the retry is a cycle in the graph.
 
-### Part 1 — basic
+### Basic
 
 ```mermaid
 flowchart LR
@@ -89,7 +89,7 @@ flowchart LR
     GEN -. "client.chat.completions" .-> OAI[OpenAI]
 ```
 
-### Part 2 — validation + retry (conditional edge)
+### Validation + retry (conditional edge)
 
 ```mermaid
 flowchart TD
@@ -108,7 +108,7 @@ State carries `context`, `summary`, `problems`, `attempts`. `route` returns `"re
 
 ## 4. No framework (baseline)
 
-The same part 2, written by hand: a `for` loop with the retry inline.
+The same validation flow, written by hand: a `for` loop with the retry inline.
 
 ```mermaid
 flowchart TD
@@ -123,9 +123,37 @@ flowchart TD
 
 ---
 
-## 5. Pydantic AI (José)
+## 5. Pydantic AI
 
-Same RAG, same validation rule, but the retry is **declarative**: the output type carries
-validators and the framework re-asks the model on failure (`ModelRetry`). José owns this
-implementation and its diagram; the shape mirrors the generic part-2 picture, with the
-validate → retry loop handled by the framework instead of hand-written.
+The RAG lives in a tool, like smolagents, but the output is typed and the retry is
+**declarative**: an output validator raises `ModelRetry` and the framework re-asks the model.
+
+### Basic
+
+```mermaid
+flowchart TD
+    BUILD["build_rag('data/resnet.pdf')"] --> RAG[(Rag: ChromaDB + sections)]
+    RUN["agent.run_sync(prompt, deps=rag)"] --> AGENT{{"Agent(output_type=DocumentSummary)<br/>reason ↔ act loop"}}
+    AGENT -- calls --> TOOL["search_document(ctx, query)"]
+    TOOL --> RETR["ctx.deps.retrieve(query)"]
+    RETR --> RAG
+    RETR -- chunks --> AGENT
+    AGENT -- "final answer, validated against the schema" --> OUT["result.output: DocumentSummary"]
+```
+
+### Validation + retry (handled by the framework)
+
+```mermaid
+flowchart TD
+    RUN["agent.run_sync(prompt, deps=rag)"] --> INS["@agent.instructions<br/>valid_sections(ctx)"]
+    INS --> AGENT{{"Agent + search_document"}}
+    AGENT --> SCHEMA{"matches DocumentSummary?"}
+    SCHEMA -- "no: framework re-asks" --> AGENT
+    SCHEMA -- yes --> VAL["@agent.output_validator<br/>check_sections → validate_summary"]
+    VAL --> CHK{problems?}
+    CHK -- "yes: raise ModelRetry (up to retries)" --> AGENT
+    CHK -- no --> OUT["result.output"]
+```
+
+The loop in the diagram is not code we wrote: `ModelRetry` and the schema check feed the
+problems back to the model, up to `retries=MAX_ATTEMPTS - 1` times.
