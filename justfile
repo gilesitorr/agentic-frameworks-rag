@@ -65,6 +65,6 @@ langgraph-validation:
 pydantic-validation:
     uv run python -m pydantic_impl.part2_validation
 
-# Force a retry live (temporary high threshold): baseline, smolagents, langgraph or pydantic
+# Force a retry live (the first attempt fails on purpose): baseline, smolagents, pydantic or langgraph
 force-retry framework="baseline":
     uv run python demo/force_retry.py {{framework}}
