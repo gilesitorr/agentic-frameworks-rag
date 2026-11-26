@@ -40,7 +40,34 @@ framework is only **how the query/validation/retry flow is wired**.
 
 ---
 
-## 2. smolagents
+## 2. No framework (baseline)
+
+No library between you and the model: the OpenAI SDK plus a hand-written loop.
+
+### Basic
+
+```mermaid
+flowchart LR
+    CTX["context = rag.retrieve(...)"] --> GEN["client.chat.completions.create"]
+    GEN --> OUT["print the summary"]
+```
+
+### Validation + retry (a hand-written for loop)
+
+```mermaid
+flowchart TD
+    CTX["context = rag.retrieve(...)"] --> LOOP{{"for attempt in 1..MAX_ATTEMPTS"}}
+    LOOP --> GEN["client.chat.completions.create (json)"]
+    GEN --> MV["DocumentSummary.model_validate_json"]
+    MV --> VS["validate_summary(summary, rag.sections)"]
+    VS --> CHK{problems?}
+    CHK -- yes --> LOOP
+    CHK -- no --> OUT[Print points]
+```
+
+---
+
+## 3. smolagents
 
 The RAG lives in a tool; the agent decides when to call it.
 
@@ -74,66 +101,7 @@ flowchart TD
 
 ---
 
-## 3. LangGraph
-
-The flow is an explicit state graph; the retry is a cycle in the graph.
-
-### Basic
-
-```mermaid
-flowchart LR
-    START((START)) --> RET["retrieve(state)"]
-    RET --> GEN["generate(state)"]
-    GEN --> END((END))
-    RET -. "rag.retrieve" .-> RAG[(Rag)]
-    GEN -. "client.chat.completions" .-> OAI[OpenAI]
-```
-
-### Validation + retry (conditional edge)
-
-```mermaid
-flowchart TD
-    START((START)) --> RET["retrieve(state)"]
-    RET --> GEN["generate(state)"]
-    GEN --> VAL["validate(state)"]
-    VAL --> ROUTE{"route(state)"}
-    ROUTE -- retry --> GEN
-    ROUTE -- end --> END((END))
-```
-
-State carries `context`, `summary`, `problems`, `attempts`. `route` returns `"retry"` or
-`"end"` based on `problems` and `attempts`.
-
----
-
-## 4. No framework (baseline)
-
-No library between you and the model: the OpenAI SDK plus a hand-written loop.
-
-### Basic
-
-```mermaid
-flowchart LR
-    CTX["context = rag.retrieve(...)"] --> GEN["client.chat.completions.create"]
-    GEN --> OUT["print the summary"]
-```
-
-### Validation + retry (a hand-written for loop)
-
-```mermaid
-flowchart TD
-    CTX["context = rag.retrieve(...)"] --> LOOP{{"for attempt in 1..MAX_ATTEMPTS"}}
-    LOOP --> GEN["client.chat.completions.create (json)"]
-    GEN --> MV["DocumentSummary.model_validate_json"]
-    MV --> VS["validate_summary(summary, rag.sections)"]
-    VS --> CHK{problems?}
-    CHK -- yes --> LOOP
-    CHK -- no --> OUT[Print points]
-```
-
----
-
-## 5. Pydantic AI
+## 4. Pydantic AI
 
 The RAG lives in a tool, like smolagents, but the output is typed and the retry is
 **declarative**: an output validator raises `ModelRetry` and the framework re-asks the model.
@@ -167,3 +135,35 @@ flowchart TD
 
 The loop in the diagram is not code we wrote: `ModelRetry` and the schema check feed the
 problems back to the model, up to `retries=MAX_ATTEMPTS - 1` times.
+
+---
+
+## 5. LangGraph
+
+The flow is an explicit state graph; the retry is a cycle in the graph.
+
+### Basic
+
+```mermaid
+flowchart LR
+    START((START)) --> RET["retrieve(state)"]
+    RET --> GEN["generate(state)"]
+    GEN --> END((END))
+    RET -. "rag.retrieve" .-> RAG[(Rag)]
+    GEN -. "client.chat.completions" .-> OAI[OpenAI]
+```
+
+### Validation + retry (conditional edge)
+
+```mermaid
+flowchart TD
+    START((START)) --> RET["retrieve(state)"]
+    RET --> GEN["generate(state)"]
+    GEN --> VAL["validate(state)"]
+    VAL --> ROUTE{"route(state)"}
+    ROUTE -- retry --> GEN
+    ROUTE -- end --> END((END))
+```
+
+State carries `context`, `summary`, `problems`, `attempts`. `route` returns `"retry"` or
+`"end"` based on `problems` and `attempts`.
